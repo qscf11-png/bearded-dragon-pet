@@ -756,12 +756,19 @@ function renderTerrariumBackground() {
         el.style.position = 'absolute';
         el.style.width = '80px';
         el.style.height = '80px';
-        el.style.backgroundImage = "url('bearded-dragon-terrarium/assets/items.png')";
-        el.style.backgroundSize = 'cover';
-        el.style.pointerEvents = 'none';
         
-        const posMap = { rock: '0 0', log: '25% 0', plant: '50% 0', bowl: '75% 0' };
-        el.style.backgroundPosition = posMap[item.type];
+        // 映射至新的高清素材
+        const imgMap = { 
+            rock: 'rock.png', 
+            log: 'log.png', 
+            plant: 'plant.png', 
+            bowl: 'cactus.png' 
+        };
+        el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${imgMap[item.type]}')`;
+        el.style.backgroundSize = 'contain';
+        el.style.backgroundRepeat = 'no-repeat';
+        el.style.backgroundPosition = 'center';
+        el.style.pointerEvents = 'none';
         
         decorLayer.appendChild(el);
     });

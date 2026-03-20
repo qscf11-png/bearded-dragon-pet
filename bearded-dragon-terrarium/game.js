@@ -4,6 +4,11 @@ let terrariumState = {
     items: []
 };
 
+let isDragging = false;
+let dragTarget = null;
+let offset = { x: 0, y: 0 };
+let hasMoved = false;
+
 const canvas = document.getElementById('terrarium-canvas');
 const saveBtn = document.getElementById('save-btn');
 const backBtn = document.getElementById('back-btn');
@@ -72,13 +77,70 @@ function renderItem(itemData) {
     el.style.top = `${itemData.y}%`;
     el.style.transform = `scale(${itemData.scale})`;
     
-    // 點擊即移除 (簡單化操作)
-    el.onclick = () => {
-        removeItem(itemData.id);
+    // 拖拽邏輯 (MouseDown)
+    el.onmousedown = (e) => {
+        isDragging = true;
+        dragTarget = itemData;
+        hasMoved = false;
+        
+        const rect = el.getBoundingClientRect();
+        offset.x = e.clientX - rect.left;
+        offset.y = e.clientY - rect.top;
+        
+        el.style.zIndex = 1000;
+        el.classList.add('is-dragging');
+        e.preventDefault();
+    };
+
+    // 點擊移除 (MouseUp 時判定如果沒位移則移除)
+    el.onmouseup = () => {
+        if (!hasMoved) {
+            removeItem(itemData.id);
+        }
     };
 
     canvas.appendChild(el);
 }
+
+// 全域拖拽監聽
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging || !dragTarget) return;
+    hasMoved = true;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    let x = e.clientX - canvasRect.left - offset.x;
+    let y = e.clientY - canvasRect.top - offset.y;
+
+    // 換算回百分比
+    const xPct = (x / canvasRect.width) * 100;
+    const yPct = (y / canvasRect.height) * 100;
+
+    // 限制在畫布內
+    const finalX = Math.max(0, Math.min(90, xPct));
+    const finalY = Math.max(0, Math.min(90, yPct));
+
+    const el = document.getElementById(`item-${dragTarget.id}`);
+    if (el) {
+        el.style.left = `${finalX}%`;
+        el.style.top = `${finalY}%`;
+        
+        // 即時更新 state
+        dragTarget.x = finalX;
+        dragTarget.y = finalY;
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    if (isDragging) {
+        const el = document.getElementById(`item-${dragTarget?.id}`);
+        if (el) {
+            el.style.zIndex = 10;
+            el.classList.remove('is-dragging');
+        }
+        isDragging = false;
+        dragTarget = null;
+    }
+});
 
 function removeItem(id) {
     terrariumState.items = terrariumState.items.filter(i => i.id !== id);
