@@ -132,17 +132,16 @@ document.querySelectorAll('.variant').forEach(v => {
 });
 
 // 開始遊戲
-elements.startGameBtn.addEventListener('click', () => {
-    const name = elements.petNameInput.value.trim();
+safeAddListener('start-game-btn', 'click', () => {
+    const nameInput = document.getElementById('pet-name-input');
+    const name = nameInput ? nameInput.value.trim() : "";
     if (name) state.pet.name = name;
     
-    // 更新寵物外觀
-    // 切換畫面
-    screens.selection.classList.add('hidden');
-    screens.game.classList.remove('hidden');
+    // 更新外觀並切換
+    if (screens.selection) screens.selection.classList.add('hidden');
+    if (screens.game) screens.game.classList.remove('hidden');
     
-    // 強制更新外觀與數值
-    elements.petDisplay.className = `type-${state.pet.type}`;
+    if (elements.petDisplay) elements.petDisplay.className = `type-${state.pet.type}`;
     updateUI();
     window.scrollTo(0, 0);
 });
@@ -451,13 +450,16 @@ closeModalBtn.addEventListener('click', () => {
 
 
 function updateUI() {
-    elements.displayPetName.textContent = state.pet.name;
-    elements.petAge.textContent = state.pet.age;
-    elements.petLength.textContent = state.pet.length.toFixed(1);
-    elements.petWeight.textContent = state.pet.weight.toFixed(1);
-    
-    elements.barHunger.style.width = `${state.pet.hunger}%`;
-    elements.barHappiness.style.width = `${state.pet.happiness}%`;
+    if (!state.pet || !elements.displayPetName) return;
+
+    try {
+        elements.displayPetName.textContent = state.pet.name;
+        if (elements.petAge) elements.petAge.textContent = state.pet.age;
+        if (elements.petLength) elements.petLength.textContent = state.pet.length.toFixed(1);
+        if (elements.petWeight) elements.petWeight.textContent = state.pet.weight.toFixed(1);
+        
+        if (elements.barHunger) elements.barHunger.style.width = `${state.pet.hunger}%`;
+        if (elements.barHappiness) elements.barHappiness.style.width = `${state.pet.happiness}%`;
     
     const barClean = document.getElementById('bar-cleanliness');
     if (barClean) barClean.style.width = `${state.pet.cleanliness}%`;
@@ -516,8 +518,11 @@ function updateUI() {
     saveGame();
 
     // 根據狀態色調
-    if (state.pet.hunger < 20) elements.barHunger.style.background = "#e74c3c";
-    else elements.barHunger.style.background = "#f39c12";
+    if (elements.barHunger) {
+        if (state.pet.hunger < 20) elements.barHunger.style.background = "#e74c3c";
+        else elements.barHunger.style.background = "#f39c12";
+    }
+} catch(e) { console.error("UI Update Error:", e); }
 }
 
 // 願望系統 (每 15 秒檢查一次)
@@ -708,7 +713,7 @@ function triggerTimeReport(hour) {
 setInterval(updateClock, 1000);
 
 // 點擊時鐘也可以報時
-document.querySelector('.time-container').addEventListener('click', () => {
+safeAddListener('game-clock', 'click', () => {
     const hour = new Date().getHours();
     triggerTimeReport(hour);
 });
