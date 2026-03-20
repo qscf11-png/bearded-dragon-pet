@@ -73,6 +73,9 @@ safeAddListener('minigame-btn', 'click', () => {
 safeAddListener('racer-game-btn', 'click', () => {
     alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
     window.open('./bearded-dragon-racer/index.html', '_blank');
+    if (state.currentWish === 'go-racing') {
+        state.currentWish = null;
+    }
 });
 
 safeAddListener('terrarium-btn-main', 'click', () => {
@@ -492,6 +495,23 @@ function updateUI() {
     // 渲染裝飾背景
     renderTerrariumBackground();
 
+    // 更新心願標籤
+    const wishBadge = document.getElementById('wish-badge');
+    if (wishBadge) {
+        if (state.currentWish) {
+            const wishMap = {
+                'feed-cricket': "想要蟋蟀 🦗",
+                'feed-roach': "想要杜比亞 🤤",
+                'sunbathe': "想曬太陽 ☀️",
+                'go-racing': "想去兜風 🚗"
+            };
+            wishBadge.textContent = wishMap[state.currentWish] || "我有心事...";
+            wishBadge.classList.remove('hidden');
+        } else {
+            wishBadge.classList.add('hidden');
+        }
+    }
+
     // 存檔 (取代舊的函數重寫方式)
     saveGame();
 
@@ -505,12 +525,13 @@ setInterval(() => {
     if (screens.game.classList.contains('hidden') || state.currentWish || state.pet.isSick) return;
     
     if (Math.random() > 0.7) {
-        const wishList = ['feed-cricket', 'feed-roach', 'sunbathe'];
+        const wishList = ['feed-cricket', 'feed-roach', 'sunbathe', 'go-racing'];
         state.currentWish = wishList[Math.floor(Math.random() * wishList.length)];
         const wishMsgs = {
             'feed-cricket': "我想吃跳跳蟋蟀...🦗",
             'feed-roach': "可以給我杜比亞蟑螂嗎？🤤",
-            'sunbathe': "我想曬太陽獲取 D3...☀️"
+            'sunbathe': "我想曬太陽獲取 D3...☀️",
+            'go-racing': "帶我出去兜風好嗎？🚗"
         };
         showBubble(wishMsgs[state.currentWish]);
     }

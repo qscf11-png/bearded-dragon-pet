@@ -324,7 +324,42 @@ header {
     gap: 10px;
 }
 
-.bar-group { flex: 1; }
+.bar-group { 
+    flex: 1; 
+    position: relative;
+}
+
+.wish-badge {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #e67e22, #f39c12);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    z-index: 5;
+    animation: wish-float 2s infinite ease-in-out;
+}
+
+.wish-badge::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #f39c12;
+}
+
+@keyframes wish-float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+}
 
 .bar {
     width: 100%;
