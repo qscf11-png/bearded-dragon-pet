@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鬃獅蜥電子雞：成長大冒險</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- 命名與挑選畫面 -->
+        <div id="selection-screen" class="screen">
+            <div class="glass-card">
+                <h2>挑選你的鬃獅蜥夥伴</h2>
+                <div class="owner-preview">
+                    <img src="assets/owner.png" alt="主人頭像" id="owner-avatar">
+                    <p>哈囉！我是負責指引你的夥伴。</p>
+                </div>
+                <div class="variant-picker">
+                    <div class="variant" data-type="red" title="紅系">
+                        <div class="v-img" style="background-color: #e74c3c;"></div>
+                        <span>紅彤彤</span>
+                    </div>
+                    <div class="variant active" data-type="orange" title="橘系">
+                        <div class="v-img" style="background-color: #e67e22;"></div>
+                        <span>橘子汽水</span>
+                    </div>
+                    <div class="variant" data-type="yellow" title="金系">
+                        <div class="v-img" style="background-color: #f1c40f;"></div>
+                        <span>小黃瓜</span>
+                    </div>
+                </div>
+                <div class="naming-area">
+                    <input type="text" id="pet-name-input" placeholder="幫牠取個好聽的名字吧..." maxlength="10">
+                    <button id="start-game-btn">開始冒險！</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主遊戲畫面 -->
+        <div id="game-screen" class="screen hidden">
+            <header>
+                <div class="owner-info">
+                    <img src="assets/owner.png" alt="Owner" class="mini-avatar">
+                    <span id="display-pet-name">我的小蜥</span>
+                </div>
+                <div class="time-container">
+                    <span id="current-time">00:00:00</span>
+                </div>
+                <div class="day-info">出生: <span id="pet-age">60</span> 天</div>
+            </header>
+
+            <main class="interaction-zone">
+                <!-- 左側：主人區域 -->
+                <div class="actor-box owner-side">
+                    <div id="owner-bubble" class="bubble hidden">幹得好！</div>
+                    <img src="assets/owner.png" alt="Owner" id="game-owner-img">
+                </div>
+
+                <!-- 中央：粒子動畫區 -->
+                <div id="particle-container"></div>
+
+                <!-- 右側：寵物區域 -->
+                <div class="actor-box pet-side">
+                    <div id="speech-bubble" class="bubble hidden">我有話要說...</div>
+                    <div id="pet-display" class="type-orange"></div>
+                </div>
+
+                <!-- 底部：數值面板 (稍微縮小) -->
+                <div class="stats-overlay">
+                    <div class="stat-row">
+                        <span>體長: <b id="pet-length">20</b>cm</span>
+                        <span>體重: <b id="pet-weight">150</b>g</span>
+                    </div>
+                    <div class="progress-bars">
+                        <div class="bar-group">
+                            <div class="bar"><div id="bar-hunger" class="fill"></div></div>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar"><div id="bar-happiness" class="fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+
+            <footer>
+                <div class="action-menu">
+                    <button class="action-btn" data-action="feed-cricket" title="餵食蟋蟀">
+                        <div class="icon">🦗</div>
+                        <span>蟋蟀 (<span id="stock-cricket">0</span>)</span>
+                    </button>
+                    <button class="action-btn" data-action="feed-roach" title="餵食杜比亞">
+                        <div class="icon">🪳</div>
+                        <span>杜比亞 (<span id="stock-roach">0</span>)</span>
+                    </button>
+                    <button class="action-btn" data-action="feed-leaf" title="餵食桑葉">
+                        <div class="icon">🌿</div>
+                        <span>桑葉 (<span id="stock-leaf">0</span>)</span>
+                    </button>
+                    <button class="action-btn" data-action="sunbathe" title="曬太陽">
+                        <div class="icon">☀️</div>
+                        <span>曬太陽</span>
+                    </button>
+                    <button class="action-btn" id="minigame-btn" title="玩捕蟲遊戲獲取食材">
+                        <div class="icon">🕹️</div>
+                        <span>獲取食材</span>
+                    </button>
+                    <button class="action-btn" id="racer-game-btn" title="坐小車出去兜風增加心情">
+                        <div class="icon">🏎️</div>
+                        <span>出去玩</span>
+                    </button>
+                    <button class="action-btn" id="show-off-btn" title="展示給同學看">
+                        <div class="icon">🏆</div>
+                        <span>競賽</span>
+                    </button>
+                    <button class="action-btn" id="see-vet-btn" title="看醫生治好病">
+                        <div class="icon">🏥</div>
+                        <span>看醫生</span>
+                    </button>
+                    <button class="action-btn" onclick="resetGame()" title="重設所有紀錄" style="opacity: 0.6;">
+                        <div class="icon">🧹</div>
+                        <span>重設</span>
+                    </button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- 競賽/展示彈窗 -->
+        <div id="comp-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h3>🏆 寵物能力比拼</h3>
+                <div class="comp-flex">
+                    <div class="comp-pet">
+                        <p>你的 <span class="your-pet-name">小蜥</span></p>
+                        <div class="mini-pet-view your-pet-view"></div>
+                        <div class="comp-stats">
+                            重量: <span id="comp-your-weight">0</span>g
+                        </div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="comp-pet">
+                        <p>同學的 小紅</p>
+                        <div class="mini-pet-view rival-pet-view"></div>
+                        <div class="comp-stats">
+                            重量: 180g
+                        </div>
+                    </div>
+                </div>
+                <div id="comp-result">...判定中...</div>
+                <button id="close-modal-btn">返回冒險</button>
+            </div>
+        </div>
+        <!-- 獎勵獲獲彈窗 -->
+        <div id="reward-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">🦗 捕蟲大賽結果</h3>
+                <div id="reward-text" style="margin: 20px 0; font-size: 18px; line-height: 1.6; color: white;">
+                    <!-- 結果文字將由 JS 填入 -->
+                </div>
+                <button id="close-reward-btn" style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: white; border: none; padding: 12px 40px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 18px; transition: transform 0.2s;">領取並返回</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 音訊提示 (隱形) -->
+    <div id="audio-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

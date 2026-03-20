@@ -1,0 +1,452 @@
+:root {
+    --primary: #f39c12;
+    --secondary: #e67e22;
+    --bg-gradient: linear-gradient(135deg, #2c3e50, #000000);
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text: #ecf0f1;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-gradient);
+    color: var(--text);
+    font-family: 'Inter', 'ZCOOL KuaiLe', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 900px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+}
+
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease;
+}
+
+.hidden {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 挑選畫面 */
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+h2 {
+    margin-bottom: 30px;
+    color: var(--primary);
+}
+
+.owner-preview {
+    margin-bottom: 30px;
+}
+
+#owner-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    margin-bottom: 10px;
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.5);
+}
+
+.variant-picker {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.variant {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.v-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    margin-bottom: 5px;
+    border: 2px solid transparent;
+}
+
+.variant.active .v-img {
+    border-color: #fff;
+    box-shadow: 0 0 15px #fff;
+}
+
+.naming-area input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 18px;
+    outline: none;
+}
+
+#start-game-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+    transition: scale 0.2s;
+}
+
+#start-game-btn:hover {
+    transform: scale(1.02);
+}
+
+/* 遊戲畫面 */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--glass);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.time-container {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 12px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    color: #f1c40f;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.time-container.active-tick {
+    animation: time-bounce 0.3s ease;
+}
+
+@keyframes time-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); color: #fff; }
+    100% { transform: scale(1); }
+}
+
+.mini-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* 互動區域佈局 */
+.interaction-zone {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 20px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 20px;
+    margin: 10px 0;
+}
+
+.actor-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 35%;
+    height: 250px;
+}
+
+#game-owner-img {
+    max-width: 120px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+    z-index: 2;
+}
+
+#particle-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+
+
+#pet-display {
+    width: 180px;
+    height: 180px;
+    background-image: url('assets/pet_variants.png');
+    background-size: 300% auto;
+    background-position: center center;
+    transition: transform 0.3s ease, background-position 0.5s ease;
+}
+
+#pet-display.type-red { background-position-x: 0%; }
+#pet-display.type-orange { background-position-x: 50%; }
+#pet-display.type-yellow { background-position-x: 100%; }
+
+
+/* 氣泡樣式統一 */
+.bubble {
+    position: absolute;
+    top: -40px;
+    background: white;
+    color: black;
+    padding: 8px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 5;
+}
+
+.bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white;
+}
+
+/* 狀態面板懸浮化 */
+.stats-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    padding: 10px 20px;
+    border-radius: 30px;
+    width: 90%;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-around;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.progress-bars {
+    display: flex;
+    gap: 10px;
+}
+
+.bar-group { flex: 1; }
+
+/* 動畫定義 */
+@keyframes owner-give {
+    0% { transform: translateX(0) rotate(0); }
+    30% { transform: translateX(20px) rotate(10deg) scale(1.1); }
+    100% { transform: translateX(0) rotate(0); }
+}
+
+@keyframes pet-react {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2) translateY(-10px); }
+    100% { transform: scale(1); }
+}
+
+@keyframes float-particle {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+}
+
+
+.animate-owner { animation: owner-give 0.5s ease; }
+.animate-pet { animation: pet-react 0.5s ease; }
+
+.particle {
+    position: absolute;
+    font-size: 30px;
+    pointer-events: none;
+    animation: float-particle 1s ease-out forwards;
+    z-index: 10;
+}
+
+
+.action-menu {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 10px;
+}
+
+#see-vet-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+#see-vet-btn:hover {
+    box-shadow: 0 0 15px #e74c3c;
+}
+
+@keyframes sick-pulse {
+    0% { filter: hue-rotate(90deg) brightness(0.8); }
+    50% { filter: hue-rotate(90deg) brightness(1.2) drop-shadow(0 0 10px #27ae60); }
+    100% { filter: hue-rotate(90deg) brightness(0.8); }
+}
+
+.pet-sick {
+    animation: sick-pulse 2s infinite ease-in-out;
+    filter: hue-rotate(90deg) brightness(0.8);
+}
+
+.action-btn span {
+    font-size: 11px;
+}
+
+
+
+.action-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.action-btn .icon {
+    font-size: 24px;
+}
+
+/* 動畫 */
+@keyframes eat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1) translateX(10px); }
+    100% { transform: scale(1); }
+}
+
+.animate-eat {
+    animation: eat 0.5s ease;
+}
+
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+.modal-content {
+    width: 90%;
+    margin-top: 0;
+}
+
+.comp-flex {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.mini-pet-view {
+    width: 100px;
+    height: 100px;
+    background-image: url('assets/pet_variants.png');
+    background-size: 300% auto;
+    background-position: center center;
+    border-radius: 10px;
+}
+
+.your-pet-view { background-position: center; }
+.rival-pet-view { background-position: left; filter: sepia(1); }
+
+.vs { font-size: 32px; font-weight: bold; color: #e74c3c; }
+
+#comp-result {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+#close-modal-btn {
+    padding: 10px 30px;
+    border-radius: 10px;
+    border: none;
+    background: #555;
+    color: white;
+    cursor: pointer;
+}
+
+
+#close-reward-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+#close-reward-btn:active {
+    transform: scale(0.95);
+}

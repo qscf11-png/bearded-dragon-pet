@@ -1,0 +1,266 @@
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const startBtn = document.getElementById('start-btn');
+const overlay = document.getElementById('overlay');
+const overlayTitle = document.getElementById('overlay-title');
+const overlayDesc = document.getElementById('overlay-desc');
+
+// 設置畫布大小
+function resize() {
+    canvas.width = 400;
+    canvas.height = Math.min(window.innerHeight, 700);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// 遊戲狀態
+let gameActive = false;
+let score = 0;
+let distance = 0;
+let speed = 5;
+let items = [];
+let lastTimestamp = 0;
+let bgOffset = 0;
+
+// 資源載入
+const carImg = new Image();
+carImg.src = 'assets/cars.png?v=2';
+const obstaclePaths = [
+    'assets/rock.png',
+    'assets/log.png',
+    'assets/puddle.png',
+    'assets/tires.png'
+];
+const obstacleImages = obstaclePaths.map(path => {
+    const img = new Image();
+    img.src = path + '?v=3';
+    return img;
+});
+
+const bgImg = new Image();
+bgImg.src = 'assets/background.png?v=2';
+
+let carsToDraw = carImg;
+let obstaclesToDraw = []; // 存儲處理後的畫布
+
+// 去背處理 (增加降級機制機制與跨域容錯)
+function makeTransparent(img, threshold = 250) {
+    if (!img || img.width === 0) return img;
+    try {
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        const cx = c.getContext('2d');
+        cx.drawImage(img, 0, 0);
+        const data = cx.getImageData(0, 0, c.width, c.height);
+        for (let i = 0; i < data.data.length; i += 4) {
+            if (data.data[i] > threshold && data.data[i+1] > threshold && data.data[i+2] > threshold) {
+                data.data[i+3] = 0;
+            }
+        }
+        cx.putImageData(data, 0, 0);
+        return c;
+    } catch (e) {
+        console.warn("透明化處理失敗 (可能是跨域限制)，使用原始圖片。", e);
+        return img;
+    }
+}
+
+Promise.all([
+    new Promise((r, j) => { carImg.onload = r; carImg.onerror = j; }),
+    ...obstacleImages.map(img => new Promise((r, j) => { img.onload = r; img.onerror = j; })),
+    new Promise((r, j) => { bgImg.onload = r; bgImg.onerror = j; })
+]).then(() => {
+    console.log("所有資源載入成功！開始處理透明化...");
+    carsToDraw = makeTransparent(carImg);
+    obstaclesToDraw = obstacleImages.map(img => makeTransparent(img));
+    console.log("初始化完成，準備開跑！");
+    draw(); // 初始畫面
+}).catch(err => {
+    console.error("資源載入失敗！將於 1 秒後嘗試直接啟動。", err);
+    setTimeout(() => {
+        obstaclesToDraw = obstacleImages; // 降級使用原始圖
+        draw();
+    }, 1000);
+});
+
+// 玩家對象
+const player = {
+    x: canvas.width / 2 - 40,
+    y: canvas.height - 120,
+    width: 80,
+    height: 80,
+    lane: 1, // 0, 1, 2
+    targetX: canvas.width / 2 - 40,
+    type: 'orange'
+};
+
+// 從主遊戲同步寵物類型
+function syncPetType() {
+    const saved = localStorage.getItem('beardedPetState');
+    if (saved) {
+        try {
+            const state = JSON.parse(saved);
+            if (state.pet && state.pet.type) {
+                player.type = state.pet.type;
+            }
+        } catch(e) {}
+    }
+}
+syncPetType();
+
+// 控制
+window.addEventListener('keydown', (e) => {
+    if (!gameActive) return;
+    if (e.key === 'a' || e.key === 'ArrowLeft') movePlayer(-1);
+    if (e.key === 'd' || e.key === 'ArrowRight') movePlayer(1);
+});
+
+canvas.addEventListener('mousedown', (e) => {
+    if (!gameActive) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x < canvas.width / 2) movePlayer(-1);
+    else movePlayer(1);
+});
+
+function movePlayer(dir) {
+    player.lane = Math.max(0, Math.min(2, player.lane + dir));
+    const laneWidth = canvas.width / 3;
+    player.targetX = player.lane * laneWidth + (laneWidth - player.width) / 2;
+}
+
+// 障礙物管理
+function spawnObstacle() {
+    const lane = Math.floor(Math.random() * 3);
+    const laneWidth = canvas.width / 3;
+    const x = lane * laneWidth + (laneWidth - 60) / 2;
+    const type = Math.floor(Math.random() * obstacleImages.length); // 0, 1, 2, 3 不同路障
+    
+    items.push({
+        x: x,
+        y: -100,
+        width: 60,
+        height: 60,
+        type: type,
+        passed: false
+    });
+}
+
+function update(deltaTime) {
+    if (!gameActive) return;
+
+    distance += speed * (deltaTime / 16.6);
+    score = Math.floor(distance / 10);
+    scoreEl.textContent = score;
+
+    // 隨時間加速
+    speed = 5 + (score / 100);
+
+    // 更新背景位移
+    bgOffset = (bgOffset + speed) % canvas.height;
+
+    // 平滑移動玩家
+    player.x += (player.targetX - player.x) * 0.2;
+
+    // 更新障礙物
+    if (Math.random() < 0.02) spawnObstacle();
+
+    items.forEach((item, index) => {
+        item.y += speed;
+        
+        // 碰撞檢測 (縮小碰撞區以增強容錯)
+        const px = player.x + 15;
+        const py = player.y + 15;
+        const pw = player.width - 30;
+        const ph = player.height - 30;
+
+        if (px < item.x + item.width - 10 &&
+            px + pw > item.x + 10 &&
+            py < item.y + item.height - 10 &&
+            py + ph > item.y + 10) {
+            gameOver();
+        }
+
+        // 移除超出螢幕的
+        if (item.y > canvas.height) {
+            items.splice(index, 1);
+        }
+    });
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 畫滾動背景
+    if (bgImg.complete) {
+        ctx.drawImage(bgImg, 0, bgOffset, canvas.width, canvas.height);
+        ctx.drawImage(bgImg, 0, bgOffset - canvas.height, canvas.width, canvas.height);
+    }
+
+    // 畫障礙物
+    items.forEach(item => {
+        const img = obstaclesToDraw[item.type];
+        if (img && (img.width > 0)) {
+            ctx.drawImage(
+                img,
+                0, 0, img.width, img.height,
+                item.x, item.y, item.width, item.height
+            );
+        } else {
+            // 視覺兜底：如果圖片沒出來，至少畫個方塊
+            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+        }
+    });
+
+    // 畫玩家
+    const typeIndices = { 'red': 0, 'orange': 1, 'yellow': 2 };
+    const index = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
+    const spriteWidth = carsToDraw.width / 3;
+    const spriteHeight = spriteWidth; // 1x3 佈局，取正方形
+    const spriteY = (carsToDraw.height - spriteHeight) / 2;
+
+    ctx.drawImage(
+        carsToDraw,
+        index * spriteWidth, spriteY, spriteWidth, spriteHeight,
+        player.x, player.y, player.width, player.height
+    );
+
+    if (gameActive) {
+        requestAnimationFrame((t) => {
+            const dt = t - lastTimestamp;
+            lastTimestamp = t;
+            update(dt);
+            draw();
+        });
+    }
+}
+
+function startGame() {
+    syncPetType();
+    gameActive = true;
+    score = 0;
+    distance = 0;
+    speed = 5;
+    items = [];
+    player.lane = 1;
+    movePlayer(0);
+    overlay.classList.add('hidden');
+    lastTimestamp = performance.now();
+    draw();
+}
+
+function gameOver() {
+    gameActive = false;
+    overlay.classList.remove('hidden');
+    overlayTitle.textContent = "旅行結束！";
+    overlayDesc.innerHTML = `你載著小蜥蜴跑了 <b>${score}</b> 米！<br>心情大好！成長了不少喔！`;
+    startBtn.textContent = "再跑一趟";
+
+    // 存儲分數，供主遊戲讀取
+    localStorage.setItem('lastRacerScore', score);
+}
+
+startBtn.addEventListener('click', startGame);
