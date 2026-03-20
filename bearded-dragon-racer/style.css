@@ -22,6 +22,29 @@ body {
     overflow: hidden;
 }
 
+/* 返回連結樣式 */
+.back-link {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 10000;
+    text-decoration: none;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.back-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
 #game-container {
     position: relative;
     width: 100%;

@@ -29,6 +29,8 @@ const state = {
     }
 };
 
+let isResetting = false; // 重置鎖，防止回寫數據
+
 
 // DOM 元素
 const screens = {
@@ -448,6 +450,7 @@ closeRewardBtn.addEventListener('click', () => {
 
 // --- 存檔與重置 ---
 function saveGame() {
+    if (isResetting) return; // 如果正在重置，則不儲存
     console.log("Saving pet state...", state.pet.name);
     localStorage.setItem('beardedPetState', JSON.stringify(state));
 }
@@ -491,8 +494,11 @@ function loadGame() {
 
 function resetGame() {
     if (confirm("確定要清空所有紀錄嗎？您的寵物將會離開...😢")) {
+        isResetting = true; // 啟動重置鎖
+        localStorage.removeItem('beardedPetState');
         localStorage.clear();
-        location.reload();
+        // 強制跳轉至首頁 URL，不帶參數
+        window.location.href = window.location.origin + window.location.pathname;
     }
 }
 
