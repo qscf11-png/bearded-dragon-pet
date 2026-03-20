@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鬃獅蜥捕食大作戰 - Bearded Dragon Bug Catcher</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 返回按鈕 -->
+        <a href="../index.html" class="back-btn">⬅ 返回主畫面</a>
+        
+        <div id="ui-layer">
+            <div class="stat-box">分數: <span id="score">0</span></div>
+            <div class="stat-box">生命: <span id="lives">3</span></div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="overlay">
+            <div class="content">
+                <h1 id="overlay-title">鬃獅蜥捕食大作戰</h1>
+                <p id="overlay-desc">控制可愛的鬃獅蜥接住掉落的蟲子！</p>
+                <button id="start-btn">開始遊戲</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js?v=5"></script>
+</body>
+</html>
