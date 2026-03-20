@@ -53,6 +53,32 @@ const elements = {
     bubble: document.getElementById('speech-bubble')
 };
 
+// 安全的事件綁定工具
+function safeAddListener(id, event, callback) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener(event, callback);
+    } else {
+        console.warn(`Element with id "${id}" not found. Skipping listener.`);
+    }
+}
+
+// 導航控制 (上移確保優先執行)
+safeAddListener('minigame-btn', 'click', () => {
+    alert("準備好去「捕蟲大賽」大顯身手了嗎？\n你的得分將轉換為當天的食物補給！\n遊戲結束後請關閉分頁回到這裡。");
+    window.open('./bearded-dragon-game/index.html', '_blank');
+});
+
+safeAddListener('racer-game-btn', 'click', () => {
+    alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
+    window.open('./bearded-dragon-racer/index.html', '_blank');
+});
+
+safeAddListener('terrarium-btn-main', 'click', () => {
+    alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
+    window.location.href = './bearded-dragon-terrarium/index.html';
+});
+
 // --- 去背處理 ---
 function processAssets() {
     const assets = ['assets/owner.png', 'assets/pet_variants.png'];
@@ -449,6 +475,9 @@ function updateUI() {
     // 渲染裝飾背景
     renderTerrariumBackground();
 
+    // 存檔 (取代舊的函數重寫方式)
+    saveGame();
+
     // 根據狀態色調
     if (state.pet.hunger < 20) elements.barHunger.style.background = "#e74c3c";
     else elements.barHunger.style.background = "#f39c12";
@@ -470,17 +499,9 @@ setInterval(() => {
     }
 }, 15000);
 
-// 小遊戲連結 (跳轉至原本的捕蟲遊戲)
-document.getElementById('minigame-btn').addEventListener('click', () => {
-    alert("準備好去「捕蟲大賽」大顯身手了嗎？\n你的得分將轉換為當天的食物補給！\n遊戲結束後請關閉分頁回到這裡。");
-    window.open('./bearded-dragon-game/index.html', '_blank');
-});
+// 導航監聽器已移至頂部安全區域
 
-// 新小遊戲：賽車大冒險
-document.getElementById('racer-game-btn').addEventListener('click', () => {
-    alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
-    window.open('./bearded-dragon-racer/index.html', '_blank');
-});
+// 導航監聽器已移至頂部安全區域
 
 // 當視窗重新獲得焦點時，檢查是否有新的小遊戲分數
 window.addEventListener('focus', () => {
@@ -580,11 +601,7 @@ function resetGame() {
 }
 
 // 攔截 updateUI 進行自動存檔
-const originalUpdateUI = updateUI;
-updateUI = function() {
-    originalUpdateUI();
-    saveGame();
-};
+// 移除了舊的 updateUI 重寫邏輯，改在 updateUI 內部呼叫 saveGame()
 
 // 立即執行或等待 DOM
 if (document.readyState === 'loading') {
@@ -704,10 +721,7 @@ function renderPoop() {
     }
 }
 
-document.getElementById('terrarium-btn-main').addEventListener('click', () => {
-    alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
-    window.location.href = './bearded-dragon-terrarium/index.html';
-});
+// 監聽器已移至頂部安全綁定區域
 
 function renderTerrariumBackground() {
     const container = document.querySelector('.interaction-zone');
