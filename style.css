@@ -522,4 +522,6 @@ header {
 }
 .preload-game-mode #game-screen {
     display: flex !important;
+    opacity: 1 !important;
+    transform: none !important;
 }

@@ -154,13 +154,13 @@ h1 { font-size: 1.2rem; }
 .item-plant { 
     background-image: url('assets/items.png'); 
     background-position: 50% center; 
-    background-size: 400% auto; 
+    background-size: 500% auto; 
 }
 .item-bowl { background-image: url('assets/cactus.png'); }
 .item-hide { 
     background-image: url('assets/items.png'); 
     background-position: 0% center; 
-    background-size: 400% auto; 
+    background-size: 500% auto; 
 }
 
 /* 擺放後的物件 */
