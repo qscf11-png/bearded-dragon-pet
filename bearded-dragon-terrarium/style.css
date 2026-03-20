@@ -148,11 +148,20 @@ h1 { font-size: 1.2rem; }
     border: 2px solid var(--glass-border);
 }
 
-/* 素材圖片映射 (使用高清單體圖) */
+/* 素材圖片映射 (使用高清單體圖與 Sprite 混合修復) */
 .item-rock { background-image: url('assets/rock.png'); }
 .item-log { background-image: url('assets/log.png'); }
-.item-plant { background-image: url('assets/plant.png'); }
-.item-bowl { background-image: url('assets/cactus.png'); } /* 將水盆改為仙人掌增加多樣性 */
+.item-plant { 
+    background-image: url('assets/items.png'); 
+    background-position: 50% center; 
+    background-size: 400% auto; 
+}
+.item-bowl { background-image: url('assets/cactus.png'); }
+.item-hide { 
+    background-image: url('assets/items.png'); 
+    background-position: 0% center; 
+    background-size: 400% auto; 
+}
 
 /* 擺放後的物件 */
 .placed-item {
