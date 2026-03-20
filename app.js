@@ -10,6 +10,7 @@ const state = {
         happiness: 50,
         vitD: 10,
         isSick: false,
+        poopCount: 0, // 當前環境中的便便數
         lastUpdate: Date.now()
     },
     inventory: {
@@ -235,6 +236,22 @@ document.getElementById('see-vet-btn').addEventListener('click', () => {
     triggerDualAnimation();
 });
 
+document.getElementById('clean-poop-btn').addEventListener('click', () => {
+    if (state.pet.poopCount <= 0) {
+        showBubble("這裡很乾淨喔！✨");
+        return;
+    }
+    
+    // 清理邏輯
+    state.pet.poopCount = 0;
+    state.pet.happiness = Math.min(100, state.pet.happiness + 5);
+    showBubble("清理乾淨了！好清爽！🧼");
+    showOwnerBubble("環境亮晶晶，心情真好！");
+    
+    updateUI();
+    triggerDualAnimation();
+});
+
 function triggerDualAnimation() {
     const owner = document.getElementById('game-owner-img');
     const pet = elements.petDisplay;
@@ -297,6 +314,15 @@ function applyEffect(effect, mult = 1) {
     
     if (effect.vitD) state.pet.vitD = Math.min(100, state.pet.vitD + effect.vitD * mult);
     
+    // 排泄連動 (進食後機率觸發)
+    if (effect.hunger && !isResetting) {
+        if (Math.random() < (state.daily.feeds / 15)) {
+            state.pet.poopCount++;
+            showBubble("哎呀...肚子一陣滾動...💩");
+            console.log("Pet pooped! Total:", state.pet.poopCount);
+        }
+    }
+
     updateUI();
 }
 
@@ -371,6 +397,9 @@ function updateUI() {
     } else {
         elements.petDisplay.classList.remove('pet-sick');
     }
+
+    // 渲染便便
+    renderPoop();
 
     // 根據狀態色調
     if (state.pet.hunger < 20) elements.barHunger.style.background = "#e74c3c";
@@ -588,7 +617,39 @@ setInterval(() => {
     state.pet.hunger = Math.max(0, state.pet.hunger - 0.2);
     state.pet.happiness = Math.max(0, state.pet.happiness - 0.1);
     
+    // 衛生影響健康 (如果有便便，隨機增加生病機率)
+    if (state.pet.poopCount > 0 && Math.random() < (state.pet.poopCount * 0.05)) {
+        state.pet.isSick = true;
+        showBubble("這裡好髒...我好像生病了...🤢");
+    }
+
     if (state.pet.hunger === 0) showBubble("我肚子餓了...");
     
     updateUI();
 }, 5000);
+
+function renderPoop() {
+    const container = document.getElementById('poop-container');
+    if (!container) return;
+
+    // 比對數量
+    const currentPoops = container.querySelectorAll('.poop-sprite');
+    if (currentPoops.length === state.pet.poopCount) return;
+
+    container.innerHTML = '';
+    for (let i = 0; i < state.pet.poopCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'poop-sprite';
+        p.textContent = '💩';
+        
+        // 隨機位置 (在龍的周圍)
+        // 限制在底部區域
+        const x = 20 + Math.random() * 60; // 20% - 80%
+        const y = 60 + Math.random() * 20; // 60% - 80%
+        
+        p.style.left = `${x}%`;
+        p.style.top = `${y}%`;
+        p.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
+        container.appendChild(p);
+    }
+}

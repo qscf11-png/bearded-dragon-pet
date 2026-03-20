@@ -64,7 +64,9 @@
                 <!-- 右側：寵物區域 -->
                 <div class="actor-box pet-side">
                     <div id="speech-bubble" class="bubble hidden">我有話要說...</div>
-                    <div id="pet-display" class="type-orange"></div>
+                    <div id="pet-display" class="type-orange">
+                        <div id="poop-container"></div>
+                    </div>
                 </div>
 
                 <!-- 底部：數值面板 (稍微縮小) -->
@@ -118,6 +120,10 @@
                     <button class="action-btn" id="see-vet-btn" title="看醫生治好病">
                         <div class="icon">🏥</div>
                         <span>看醫生</span>
+                    </button>
+                    <button class="action-btn" id="clean-poop-btn" title="清理寵物的排勞物">
+                        <div class="icon">🧼</div>
+                        <span>清便便</span>
                     </button>
                     <button class="action-btn" onclick="resetGame()" title="重設所有紀錄" style="opacity: 0.6;">
                         <div class="icon">🧹</div>
