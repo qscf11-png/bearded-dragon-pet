@@ -13,13 +13,79 @@ const canvas = document.getElementById('terrarium-canvas');
 const saveBtn = document.getElementById('save-btn');
 const backBtn = document.getElementById('back-btn');
 
+// --- 素材透明化處理 ---
+let processedAssets = {};
+
+function processAssets() {
+    const assets = ['rock.png', 'log.png', 'cactus.png', 'items.png'];
+    assets.forEach(filename => {
+        const img = new Image();
+        img.src = `assets/${filename}`;
+        img.onload = () => {
+            const tempCanvas = document.createElement('canvas');
+            const ctx = tempCanvas.getContext('2d');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const data = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            // 移除接近白色的背景
+            for (let i = 0; i < data.data.length; i += 4) {
+                if (data.data[i] > 240 && data.data[i+1] > 240 && data.data[i+2] > 240) {
+                    data.data[i+3] = 0;
+                }
+            }
+            ctx.putImageData(data, 0, 0);
+            processedAssets[filename] = tempCanvas.toDataURL();
+            console.log(`Processed: ${filename}`);
+            
+            // 重新渲染已存在畫布上的物件
+            refreshRenderedItems();
+        };
+    });
+}
+
+function refreshRenderedItems() {
+    const items = document.querySelectorAll('.placed-item');
+    items.forEach(el => {
+        const id = el.id.replace('item-', '');
+        const itemData = terrariumState.items.find(i => i.id == id);
+        if (itemData) {
+            applyAsset(el, itemData.type);
+        }
+    });
+}
+
+function applyAsset(el, type) {
+    const imgMap = { 
+        rock: 'rock.png', 
+        log: 'log.png', 
+        plant: 'items.png', 
+        bowl: 'cactus.png',
+        hide: 'items.png'
+    };
+    const filename = imgMap[type];
+    if (processedAssets[filename]) {
+        el.style.backgroundImage = `url(${processedAssets[filename]})`;
+    } else {
+        el.style.backgroundImage = `url(assets/${filename})`;
+    }
+}
+
 // 初始化並載入
 window.onload = () => {
-    const saved = localStorage.getItem('beardedTerrariumNew');
-    if (saved) {
-        terrariumState = JSON.parse(saved);
-        applySubstrate(terrariumState.substrate);
-        terrariumState.items.forEach(item => renderItem(item));
+    processAssets();
+    try {
+        const saved = localStorage.getItem('beardedTerrariumNew');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && parsed.items) {
+                terrariumState = parsed;
+                applySubstrate(terrariumState.substrate);
+                terrariumState.items.forEach(item => renderItem(item));
+            }
+        }
+    } catch (e) {
+        console.error("Load state error:", e);
     }
 };
 
@@ -73,6 +139,8 @@ function renderItem(itemData) {
     el.className = `placed-item item-${itemData.type} animate-pop`;
     el.id = `item-${itemData.id}`;
     
+    applyAsset(el, itemData.type);
+
     el.style.left = `${itemData.x}%`;
     el.style.top = `${itemData.y}%`;
     el.style.transform = `scale(${itemData.scale})`;
