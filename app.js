@@ -11,6 +11,7 @@ const state = {
         vitD: 10,
         isSick: false,
         poopCount: 0, // 當前環境中的便便數
+        cleanliness: 100, // 新增清潔度 (0-100)
         lastUpdate: Date.now()
     },
     inventory: {
@@ -252,6 +253,20 @@ document.getElementById('clean-poop-btn').addEventListener('click', () => {
     triggerDualAnimation();
 });
 
+document.getElementById('bath-btn').addEventListener('click', () => {
+    // 洗澡邏輯
+    state.pet.cleanliness = 100;
+    state.pet.happiness = Math.min(100, state.pet.happiness + 3);
+    showBubble("洗完澡香噴噴！🛁✨");
+    showOwnerBubble("來刷刷背，變乾淨吧！");
+    
+    // 噴發泡泡粒子
+    createParticles(elements.petDisplay.offsetLeft + 100, elements.petDisplay.offsetTop + 100, 'bubble');
+    
+    updateUI();
+    triggerDualAnimation();
+});
+
 function triggerDualAnimation() {
     const owner = document.getElementById('game-owner-img');
     const pet = elements.petDisplay;
@@ -270,21 +285,43 @@ function triggerDualAnimation() {
     }, 600);
 }
 
-function createParticle(action) {
+// 支援複數粒子的生成函數 (例如洗澡泡泡)
+function createParticles(x, y, type = 'happy', count = 20) {
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => createParticle(type, x, y), i * 50);
+    }
+}
+
+function createParticle(type, startX = null, startY = null) {
     const container = document.getElementById('particle-container');
     const p = document.createElement('div');
     p.className = 'particle';
     
-    const icons = {
-        'feed-cricket': '🦗',
-        'feed-roach': '🪳',
-        'feed-leaf': '🌿',
-        'sunbathe': '☀️'
-    };
+    if (type === 'bubble') {
+        p.textContent = '🫧'; // 使用泡泡 Emoji 或自定義樣式
+        p.style.fontSize = `${Math.random() * 10 + 15}px`;
+    } else {
+        const icons = {
+            'feed-cricket': '🦗',
+            'feed-roach': '🪳',
+            'feed-leaf': '🌿',
+            'sunbathe': '☀️',
+            'happy': '❤️',
+            'sad': '💔'
+        };
+        p.textContent = icons[type] || '✨';
+    }
+
+    // 如果指定了座標 (例如在寵物身上洗澡)
+    if (startX !== null && startY !== null) {
+        p.style.left = `${startX + (Math.random() - 0.5) * 150}px`;
+        p.style.top = `${startY + (Math.random() - 0.5) * 150}px`;
+        p.style.position = 'fixed';
+    } else {
+        p.style.left = '50%';
+        p.style.top = '50%';
+    }
     
-    p.textContent = icons[action] || '❤️';
-    p.style.left = '50%';
-    p.style.top = '50%';
     container.appendChild(p);
     
     setTimeout(() => p.remove(), 1000);
@@ -373,6 +410,9 @@ function updateUI() {
     
     elements.barHunger.style.width = `${state.pet.hunger}%`;
     elements.barHappiness.style.width = `${state.pet.happiness}%`;
+    
+    const barClean = document.getElementById('bar-cleanliness');
+    if (barClean) barClean.style.width = `${state.pet.cleanliness}%`;
     
     // 庫存顯示
     const cricketEl = document.getElementById('stock-cricket');
@@ -616,11 +656,13 @@ setInterval(() => {
     
     state.pet.hunger = Math.max(0, state.pet.hunger - 0.2);
     state.pet.happiness = Math.max(0, state.pet.happiness - 0.1);
+    state.pet.cleanliness = Math.max(0, state.pet.cleanliness - 0.15); // 清潔度隨時間下降
     
-    // 衛生影響健康 (如果有便便，隨機增加生病機率)
-    if (state.pet.poopCount > 0 && Math.random() < (state.pet.poopCount * 0.05)) {
+    // 衛生與清潔影響健康
+    const dirtyRisk = (state.pet.poopCount * 0.05) + (state.pet.cleanliness < 20 ? 0.05 : 0);
+    if (dirtyRisk > 0 && Math.random() < dirtyRisk) {
         state.pet.isSick = true;
-        showBubble("這裡好髒...我好像生病了...🤢");
+        showBubble("癢癢的...不舒服...🤢");
     }
 
     if (state.pet.hunger === 0) showBubble("我肚子餓了...");
