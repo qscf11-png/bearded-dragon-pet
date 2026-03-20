@@ -12,6 +12,7 @@ const state = {
         isSick: false,
         poopCount: 0, // 當前環境中的便便數
         cleanliness: 100, // 新增清潔度 (0-100)
+        thirst: 100, // 新增渴度 (0-100)
         lastUpdate: Date.now()
     },
     inventory: {
@@ -141,6 +142,19 @@ elements.startGameBtn.addEventListener('click', () => {
     elements.petDisplay.className = `type-${state.pet.type}`;
     updateUI();
     window.scrollTo(0, 0);
+});
+
+// --- 喝水按鈕 ---
+safeAddListener('drink-btn', 'click', () => {
+    if (state.pet.thirst >= 100) {
+        showBubble("我不渴喔！💧");
+        return;
+    }
+    state.pet.thirst = Math.min(100, state.pet.thirst + 30);
+    SoundManager.playSun(); // 暫用太陽音效，聽起來也很清脆
+    showBubble("呼...好喝！💧");
+    createParticle('water');
+    updateUI();
 });
 
 
@@ -445,6 +459,9 @@ function updateUI() {
     const barClean = document.getElementById('bar-cleanliness');
     if (barClean) barClean.style.width = `${state.pet.cleanliness}%`;
     
+    const barThirst = document.getElementById('bar-thirst');
+    if (barThirst) barThirst.style.width = `${state.pet.thirst}%`;
+    
     // 庫存顯示
     const cricketEl = document.getElementById('stock-cricket');
     const roachEl = document.getElementById('stock-roach');
@@ -682,6 +699,7 @@ setInterval(() => {
     state.pet.hunger = Math.max(0, state.pet.hunger - 0.2);
     state.pet.happiness = Math.max(0, state.pet.happiness - 0.1);
     state.pet.cleanliness = Math.max(0, state.pet.cleanliness - 0.15); // 清潔度隨時間下降
+    state.pet.thirst = Math.max(0, state.pet.thirst - 0.25); // 渴度隨時間下降
     
     // 衛生與清潔影響健康
     const dirtyRisk = (state.pet.poopCount * 0.05) + (state.pet.cleanliness < 20 ? 0.05 : 0);
@@ -691,6 +709,7 @@ setInterval(() => {
     }
 
     if (state.pet.hunger === 0) showBubble("我肚子餓了...");
+    if (state.pet.thirst < 20) showBubble("我想喝水...💧");
     
     updateUI();
 }, 5000);

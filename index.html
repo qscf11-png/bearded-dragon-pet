@@ -6,6 +6,14 @@
     <title>鬃獅蜥電子雞：成長大冒險</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        // 預加載優化：若有存檔則立即隱藏選擇畫面，防止閃爍
+        (function() {
+            if (localStorage.getItem('beardedPetState')) {
+                document.documentElement.classList.add('preload-game-mode');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div id="app">
@@ -85,6 +93,9 @@
                         <div class="bar-group">
                             <div class="bar"><div id="bar-cleanliness" class="fill"></div></div>
                         </div>
+                        <div class="bar-group">
+                            <div class="bar"><div id="bar-thirst" class="fill"></div></div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -135,6 +146,10 @@
                     <button class="action-btn" id="terrarium-btn-main" title="打造小龍專屬的家">
                         <div class="icon">🏠</div>
                         <span>裝飾家</span>
+                    </button>
+                    <button class="action-btn" id="drink-btn" title="給小龍喝口涼水">
+                        <div class="icon">💧</div>
+                        <span>喝水</span>
                     </button>
                     <button class="action-btn" onclick="resetGame()" title="重設所有紀錄" style="opacity: 0.6;">
                         <div class="icon">🧹</div>

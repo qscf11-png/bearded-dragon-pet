@@ -347,6 +347,7 @@ header {
 #bar-hunger { background: linear-gradient(to right, #e67e22, #d35400); }
 #bar-happiness { background: linear-gradient(to right, #f1c40f, #f39c12); }
 #bar-cleanliness { background: linear-gradient(to right, #3498db, #2980b9); }
+#bar-thirst { background: linear-gradient(to right, #2980b9, #1c5980); }
 
 /* 動畫定義 */
 @keyframes owner-give {
@@ -513,4 +514,12 @@ header {
 
 #close-reward-btn:active {
     transform: scale(0.95);
+}
+
+/* 預加載隱藏邏輯：若檢測到存檔則立即切換畫面，防止登入閃爍 */
+.preload-game-mode #selection-screen {
+    display: none !important;
+}
+.preload-game-mode #game-screen {
+    display: flex !important;
 }
