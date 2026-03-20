@@ -267,6 +267,11 @@ document.getElementById('bath-btn').addEventListener('click', () => {
     triggerDualAnimation();
 });
 
+document.getElementById('terrarium-btn').addEventListener('click', () => {
+    alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
+    window.location.href = './bearded-dragon-terrarium/index.html';
+});
+
 function triggerDualAnimation() {
     const owner = document.getElementById('game-owner-img');
     const pet = elements.petDisplay;
@@ -440,6 +445,9 @@ function updateUI() {
 
     // 渲染便便
     renderPoop();
+
+    // 渲染裝飾背景
+    renderTerrariumBackground();
 
     // 根據狀態色調
     if (state.pet.hunger < 20) elements.barHunger.style.background = "#e74c3c";
@@ -694,4 +702,53 @@ function renderPoop() {
         p.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
         container.appendChild(p);
     }
+}
+
+document.getElementById('terrarium-btn-main').addEventListener('click', () => {
+    alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
+    window.location.href = './bearded-dragon-terrarium/index.html';
+});
+
+function renderTerrariumBackground() {
+    const container = document.querySelector('.interaction-zone');
+    if (!container) return;
+
+    const saved = localStorage.getItem('beardedTerrariumNew');
+    if (!saved) return;
+
+    const config = JSON.parse(saved);
+
+    // 應用底材背景
+    container.className = `interaction-zone substrate-${config.substrate}`;
+    
+    // 渲染裝飾物件
+    let decorLayer = document.getElementById('decor-background-layer');
+    if (!decorLayer) {
+        decorLayer = document.createElement('div');
+        decorLayer.id = 'decor-background-layer';
+        container.insertBefore(decorLayer, container.firstChild);
+    }
+
+    const currentCount = decorLayer.querySelectorAll('.placed-decor').length;
+    if (currentCount === config.items.length) return;
+
+    decorLayer.innerHTML = '';
+    config.items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = `placed-decor item-${item.type}`;
+        el.style.left = `${item.x}%`;
+        el.style.top = `${item.y}%`;
+        el.style.transform = `scale(${item.scale})`;
+        el.style.position = 'absolute';
+        el.style.width = '80px';
+        el.style.height = '80px';
+        el.style.backgroundImage = "url('bearded-dragon-terrarium/assets/items.png')";
+        el.style.backgroundSize = 'cover';
+        el.style.pointerEvents = 'none';
+        
+        const posMap = { rock: '0 0', log: '25% 0', plant: '50% 0', bowl: '75% 0' };
+        el.style.backgroundPosition = posMap[item.type];
+        
+        decorLayer.appendChild(el);
+    });
 }

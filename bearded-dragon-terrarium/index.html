@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>鬃獅蜥專屬爬蟲缸裝飾</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="editor-container">
+        <header>
+            <button id="back-btn">🏠 返回冒險</button>
+            <h1>打造專屬爬蟲缸</h1>
+            <button id="save-btn">💾 儲存佈置</button>
+        </header>
+
+        <div id="terrarium-canvas" class="substrate-sand">
+            <!-- 裝飾物件將動態注入於此 -->
+            <div id="drop-zone-indicator">點擊選單物件放入缸中</div>
+        </div>
+
+        <div id="asset-menu" class="glass-card">
+            <div class="menu-tabs">
+                <button class="tab-btn active" data-tab="substrate">底材</button>
+                <button class="tab-btn" data-tab="items">裝飾品</button>
+            </div>
+            
+            <div id="substrate-tab" class="tab-content active">
+                <div class="item-option" data-type="sand" data-category="substrate">
+                    <div class="preview substrate-sand"></div>
+                    <span>細沙</span>
+                </div>
+                <div class="item-option" data-type="grass" data-category="substrate">
+                    <div class="preview substrate-grass"></div>
+                    <span>草皮</span>
+                </div>
+                <div class="item-option" data-type="slate" data-category="substrate">
+                    <div class="preview substrate-slate"></div>
+                    <span>岩板</span>
+                </div>
+            </div>
+
+            <div id="items-tab" class="tab-content">
+                <div class="item-option" data-type="rock" data-category="item">
+                    <div class="preview item-rock"></div>
+                    <span>防滑岩石</span>
+                </div>
+                <div class="item-option" data-type="log" data-category="item">
+                    <div class="preview item-log"></div>
+                    <span>攀爬沉木</span>
+                </div>
+                <div class="item-option" data-type="plant" data-category="item">
+                    <div class="preview item-plant"></div>
+                    <span>仿真植物</span>
+                </div>
+                <div class="item-option" data-type="bowl" data-category="item">
+                    <div class="preview item-bowl"></div>
+                    <span>陶土水盆</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="control-hint">
+            <p>💡 提示：點擊缸內物件可進行 <b>移除</b></p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
