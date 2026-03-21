@@ -205,13 +205,17 @@ function handleAction(actionType) {
             multiplier = 2;
             showBubble("這就是我想做的！耶！✨");
             state.currentWish = null;
-            lastWishClearTime = Date.now(); 
             
-            // --- 物理隱藏保底 (關鍵修復：不等 updateUI) ---
+            // 立即固化達成時間，防止計時器回寫
+            const now = Date.now();
+            lastWishClearTime = now;
+            localStorage.setItem('lastWishClearTime', now);
+            
+            // --- 物理隱藏保底 ---
             const badge = document.getElementById('wish-badge');
             if (badge) badge.classList.add('hidden');
             
-            saveGame(); // 即刻同步數據
+            saveGame(); 
         } else {
             showBubble(effect.msg);
             showOwnerBubble(effect.ownerMsg || "來，給你吃！");
@@ -688,10 +692,8 @@ function loadGame() {
             const parsed = JSON.parse(saved);
             console.log("Data found! Recovering pet:", parsed.pet.name);
             
-            // 狀態合併
-            if (parsed.pet) Object.assign(state.pet, parsed.pet);
-            if (parsed.inventory) Object.assign(state.inventory, parsed.inventory);
-            if (parsed.daily) Object.assign(state.daily, parsed.daily);
+            // 全域狀態深度合併 (包含 currentWish 等)
+            Object.assign(state, parsed);
             
             const today = new Date().toLocaleDateString();
             if (state.daily.date !== today) {
