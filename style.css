@@ -11,6 +11,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    user-select: none; /* 防止手機點擊時選取文字 */
+    -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
 }
 
 body {
@@ -521,6 +524,39 @@ header {
 
 .action-btn .icon {
     font-size: 24px;
+}
+
+/* --- 手機版適配 (Mobile Fixes) --- */
+@media (max-width: 600px) {
+    header {
+        padding: 10px 15px;
+    }
+    
+    .stats-overlay {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .stat-card {
+        padding: 8px;
+    }
+    
+    .stat-card label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-card span {
+        font-size: 0.9rem;
+    }
+    
+    .interaction-zone {
+        padding-top: 20px;
+    }
+    
+    .pet-container {
+        width: 180px;
+        height: 180px;
+    }
 }
 
 /* 動畫 */

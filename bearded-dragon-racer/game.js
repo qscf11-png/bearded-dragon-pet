@@ -157,11 +157,21 @@ window.addEventListener('keydown', (e) => {
 
 canvas.addEventListener('mousedown', (e) => {
     if (!gameActive) return;
+    handleInput(e.clientX);
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    if (!gameActive) return;
+    e.preventDefault(); // 防止縮放或捲動
+    handleInput(e.touches[0].clientX);
+}, { passive: false });
+
+function handleInput(clientX) {
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = clientX - rect.left;
     if (x < canvas.width / 2) movePlayer(-1);
     else movePlayer(1);
-});
+}
 
 function movePlayer(dir) {
     player.lane = Math.max(0, Math.min(2, player.lane + dir));

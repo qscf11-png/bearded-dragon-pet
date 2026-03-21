@@ -54,13 +54,30 @@ const elements = {
     bubble: document.getElementById('speech-bubble')
 };
 
-// 安全的事件綁定工具
+// --- 基礎工具 ---
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 function safeAddListener(id, event, callback) {
     const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener(event, callback);
-    } else {
+    if (!el) {
         console.warn(`Element with id "${id}" not found. Skipping listener.`);
+        return;
+    }
+
+    if (event === 'click' && isTouchDevice) {
+        // 在觸控設備上，我們同時監聽 touchstart 以加速響應，但需防止重複觸發
+        let touched = false;
+        el.addEventListener('touchstart', (e) => {
+            touched = true;
+            callback(e);
+        }, { passive: false });
+        
+        el.addEventListener('click', (e) => {
+            if (!touched) callback(e);
+            touched = false; // Reset for next interaction
+        });
+    } else {
+        el.addEventListener(event, callback);
     }
 }
 
