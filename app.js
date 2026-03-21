@@ -112,6 +112,7 @@ function setupListeners() {
         state.pet.isSick = false;
         state.pet.happiness = Math.max(0, state.pet.happiness - 10);
         showBubble("呼...好好了！🩺");
+        showOwnerBubble("沒事就好，要快快好起來喔！");
         updateUI();
     });
 
@@ -155,7 +156,18 @@ function handleAction(actionType) {
     }
     const effect = actions[actionType];
     if (effect) {
-        applyEffect(effect, state.currentWish === actionType ? 2 : 1);
+        // 願望加成與對話
+        let multiplier = 1;
+        if (state.currentWish === actionType) {
+            multiplier = 2;
+            showBubble("這就是我想做的！耶！✨");
+            state.currentWish = null;
+        } else {
+            showBubble(effect.msg);
+            showOwnerBubble(effect.ownerMsg || "來，給你吃！");
+        }
+        
+        applyEffect(effect, multiplier);
         triggerDualAnimation();
         createParticle(actionType);
         
