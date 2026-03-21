@@ -86,7 +86,7 @@ let carsToDraw = carImg;
 let obstaclesToDraw = []; // 存儲處理後的畫布
 
 // 去背處理 (優化跨域容錯與白色過濾)
-function makeTransparent(img, threshold = 245) {
+function makeTransparent(img, threshold = 220) {
     if (!img || img.complete === false || img.width === 0) return img;
     try {
         const c = document.createElement('canvas');
