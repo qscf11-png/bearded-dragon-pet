@@ -199,25 +199,30 @@ function draw() {
         }
     });
 
-    // 畫玩家賽車 (關鍵修復：改為縱向 3x1 切割)
+    // 畫玩家賽車 (最終校正：橫向 1x3 切割 + 清晰度強化)
     const typeIndices = { 'red': 0, 'orange': 1, 'yellow': 2 };
     const index = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
     
-    // 正確切割：素材為縱向排列
-    const sw = carsToDraw.width;
-    const sh = carsToDraw.height / 3; 
-    const sy = index * sh;
+    // 正確切割：素材為橫向 1x3 排列
+    const sw = carsToDraw.width / 3;
+    const sh = carsToDraw.height; 
+    const sx = index * sw;
     
-    // 保持原始素材比例繪製，防止變扁
+    // 提升清晰度：針對像素風格或小素材禁用平滑縮放
+    ctx.imageSmoothingEnabled = false;
+
+    // 保持原始素材比例繪製
     const aspectRatio = sw / sh;
     const drawWidth = player.width;
     const drawHeight = drawWidth / aspectRatio;
     
     ctx.drawImage(
         carsToDraw,
-        0, sy, sw, sh,
+        sx, 0, sw, sh,
         player.x, player.y + (player.height - drawHeight), drawWidth, drawHeight
     );
+    
+    ctx.imageSmoothingEnabled = true; // 恢復預設
 
     ctx.restore();
 
