@@ -69,6 +69,10 @@ function makeTransparent(img, threshold = 245) {
     }
 }
 
+Promise.all([
+    new Promise((r, j) => { carImg.onload = r; carImg.onerror = j; }),
+    ...obstacleImages.map(img => new Promise((r, j) => { img.onload = r; img.onerror = j; })),
+    new Promise((r, j) => { bgImg.onload = r; bgImg.onerror = j; })
 ]).then(() => {
     carsToDraw = makeTransparent(carImg);
     obstaclesToDraw = obstacleImages.map(img => makeTransparent(img));
@@ -130,7 +134,7 @@ function spawnObstacle() {
     const lane = Math.floor(Math.random() * 3);
     const laneWidth = canvas.width / 3;
     const x = lane * laneWidth + (laneWidth - 60) / 2;
-    const type = Math.floor(Math.random() * obstacleImages.length); // 0, 1, 2, 3 不同路障
+    const type = Math.floor(Math.random() * obstacleImages.length); 
     
     items.push({
         x: x,
@@ -149,81 +153,70 @@ function update(deltaTime) {
     score = Math.floor(distance / 10);
     scoreEl.textContent = score;
 
-    // 隨時間加速
     speed = 5 + (score / 100);
-
-    // 更新背景位移
     bgOffset = (bgOffset + speed) % canvas.height;
-
-    // 平滑移動玩家
     player.x += (player.targetX - player.x) * 0.2;
 
-    // 更新障礙物
     if (Math.random() < 0.02) spawnObstacle();
 
     items.forEach((item, index) => {
         item.y += speed;
-        
-        // 碰撞檢測 (縮小碰撞區以增強容錯)
+        // 碰撞檢測
         const px = player.x + 15;
         const py = player.y + 15;
         const pw = player.width - 30;
         const ph = player.height - 30;
-
-        if (px < item.x + item.width - 10 &&
-            px + pw > item.x + 10 &&
-            py < item.y + item.height - 10 &&
-            py + ph > item.y + 10) {
+        if (px < item.x + item.width - 10 && px + pw > item.x + 10 && py < item.y + item.height - 10 && py + ph > item.y + 10) {
             gameOver();
         }
-
-        // 移除超出螢幕的
-        if (item.y > canvas.height) {
-            items.splice(index, 1);
-        }
+        if (item.y > canvas.height) items.splice(index, 1);
     });
 }
 
 function draw() {
+    if (animationId) cancelAnimationFrame(animationId);
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 畫滾動背景
+    // 1. 畫背景
     if (bgImg.complete) {
         ctx.drawImage(bgImg, 0, bgOffset, canvas.width, canvas.height);
         ctx.drawImage(bgImg, 0, bgOffset - canvas.height, canvas.width, canvas.height);
     }
 
+    // 2. 物理去背保底
+    ctx.save();
+    ctx.globalCompositeOperation = 'multiply';
+
     // 畫障礙物
     items.forEach(item => {
         const img = obstaclesToDraw[item.type];
         if (img && (img.width > 0)) {
-            ctx.drawImage(
-                img,
-                0, 0, img.width, img.height,
-                item.x, item.y, item.width, item.height
-            );
+            ctx.drawImage(img, item.x, item.y, item.width, item.height);
         } else {
-            // 視覺兜底：如果圖片沒出來，至少畫個方塊
-            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+            ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
             ctx.fillRect(item.x, item.y, item.width, item.height);
         }
     });
 
-    // 畫玩家
+    // 畫玩家賽車
     const typeIndices = { 'red': 0, 'orange': 1, 'yellow': 2 };
     const index = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
-    const spriteWidth = carsToDraw.width / 3;
-    const spriteHeight = spriteWidth; // 1x3 佈局，取正方形
-    const spriteY = (carsToDraw.height - spriteHeight) / 2;
-
+    
+    // 精確切割 Sprite (橫向 1x3 佈局)
+    const sw = carsToDraw.width / 3;
+    const sh = carsToDraw.height; 
+    
     ctx.drawImage(
         carsToDraw,
-        index * spriteWidth, spriteY, spriteWidth, spriteHeight,
+        index * sw, 0, sw, sh,
         player.x, player.y, player.width, player.height
     );
 
+    ctx.restore();
+
     if (gameActive) {
-        requestAnimationFrame((t) => {
+        animationId = requestAnimationFrame((t) => {
             const dt = t - lastTimestamp;
             lastTimestamp = t;
             update(dt);
@@ -252,8 +245,6 @@ function gameOver() {
     overlayTitle.textContent = "旅行結束！";
     overlayDesc.innerHTML = `你載著小蜥蜴跑了 <b>${score}</b> 米！<br>心情大好！成長了不少喔！`;
     startBtn.textContent = "再跑一趟";
-
-    // 存儲分數，供主遊戲讀取
     localStorage.setItem('lastRacerScore', score);
 }
 
