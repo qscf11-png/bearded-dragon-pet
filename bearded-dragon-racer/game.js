@@ -172,6 +172,10 @@ function update(deltaTime) {
         if (item.y > canvas.height) items.splice(index, 1);
     });
 }
+function draw() {
+    if (animationId) cancelAnimationFrame(animationId);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // --- 核心渲染管線 ---
     ctx.imageSmoothingEnabled = false; // 確保像素風格銳利不模糊
@@ -182,11 +186,10 @@ function update(deltaTime) {
         ctx.drawImage(bgImg, 0, bgOffset - canvas.height, canvas.width, canvas.height);
     }
 
-    // 2. 畫障礙物 (補回遺失的邏輯)
+    // 2. 畫障礙物
     items.forEach(item => {
         const img = obstaclesToDraw[item.type];
         if (img && (img.width > 0)) {
-            // 障礙物也套用 1:1 像素渲染
             ctx.drawImage(img, item.x, item.y, item.width, item.height);
         } else {
             ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
