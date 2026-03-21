@@ -662,7 +662,7 @@ setInterval(() => {
     
     // 獲取最新冷卻時間 (多視窗同步)
     const currentClearTime = parseInt(localStorage.getItem('lastWishClearTime') || 0);
-    if (Date.now() - currentClearTime < 15000) return; // 冷卻 15 秒
+    if (Date.now() - currentClearTime < 60000) return; // 延長冷卻至 60 秒，避免壓力過大
 
     // 願望觸發機率
     if (Math.random() > 0.6) {
@@ -724,15 +724,18 @@ window.addEventListener('focus', () => {
         }
     }
 
-    // 3. 確保願望標籤同步清理 (防禦性修正：使用剛取出的 lastRacerScore 判斷，因為 localStorage 中的已被上面移除)
-    if (state.currentWish === 'go-racing' && lastRacerScore) {
-        state.currentWish = null;
-        const now = Date.now();
-        lastWishClearTime = now;
-        localStorage.setItem('lastWishClearTime', now); // 補上同步寫入
+    // 3. 確保小遊戲歸來後，強制重置願望冷卻時間 (無論剛才願望是否為去兜風)
+    if (lastRacerScore || lastBugScore) {
+        if ((state.currentWish === 'go-racing' && lastRacerScore) || 
+            ((state.currentWish === 'feed-cricket' || state.currentWish === 'feed-roach') && lastBugScore)) {
+            state.currentWish = null;
+            const badge = document.getElementById('wish-badge');
+            if (badge) badge.classList.add('hidden');
+        }
         
-        const badge = document.getElementById('wish-badge');
-        if (badge) badge.classList.add('hidden');
+        // 核心修復：不管願望是什麼，只要從小遊戲回來，就重新開始計算 60 秒冷卻
+        const now = Date.now().toString();
+        localStorage.setItem('lastWishClearTime', now); 
         
         saveGame();
         updateUI();
