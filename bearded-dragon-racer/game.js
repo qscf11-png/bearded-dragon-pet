@@ -173,10 +173,8 @@ function update(deltaTime) {
     });
 }
 
-function draw() {
-    if (animationId) cancelAnimationFrame(animationId);
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // --- 核心渲染管線 ---
+    ctx.imageSmoothingEnabled = false; // 確保像素風格銳利不模糊
 
     // 1. 畫背景
     if (bgImg.complete) {
@@ -184,31 +182,35 @@ function draw() {
         ctx.drawImage(bgImg, 0, bgOffset - canvas.height, canvas.width, canvas.height);
     }
 
-    // 畫玩家賽車 (終極視覺校正：正方形切割 + 高清去背)
+    // 2. 畫障礙物 (補回遺失的邏輯)
+    items.forEach(item => {
+        const img = obstaclesToDraw[item.type];
+        if (img && (img.width > 0)) {
+            // 障礙物也套用 1:1 像素渲染
+            ctx.drawImage(img, item.x, item.y, item.width, item.height);
+        } else {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+        }
+    });
+
+    // 3. 畫玩家賽車 (正方形切割隔離)
     const typeIndices = { 'red': 0, 'orange': 1, 'yellow': 2 };
-    const index = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
+    const idx = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
     
-    // 同步主遊戲去背素材
-    const img = carsToDraw;
-    
-    // 正確切割：素材為橫向 1x3，且已知單台車為正方格比例
-    const sw = img.width / 3;
-    const sh = sw; // 強致鎖定為正方形，防止抓到下方其他內容
-    const sx = index * sw;
-    const sy = (img.height - sh) / 2; // 置中抓取
-    
-    // 渲染設置：禁用平滑以提升銳利度
-    ctx.imageSmoothingEnabled = false;
-    
+    const carImgSource = carsToDraw;
+    const sw = carImgSource.width / 3;
+    const sh = sw; // 強制正方形切割，解決重疊
+    const sx = idx * sw;
+    const sy = (carImgSource.height - sh) / 2; // 垂直置中
+
     ctx.drawImage(
-        img,
+        carImgSource,
         sx, sy, sw, sh,
         player.x, player.y, player.width, player.height
     );
-    
-    ctx.imageSmoothingEnabled = true;
 
-    ctx.restore();
+    ctx.imageSmoothingEnabled = true;
 
     if (gameActive) {
         animationId = requestAnimationFrame((t) => {
