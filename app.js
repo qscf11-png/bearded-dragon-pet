@@ -64,24 +64,102 @@ function safeAddListener(id, event, callback) {
     }
 }
 
-// 導航控制 (上移確保優先執行)
-safeAddListener('minigame-btn', 'click', () => {
-    alert("準備好去「捕蟲大賽」大顯身手了嗎？\n你的得分將轉換為當天的食物補給！\n遊戲結束後請關閉分頁回到這裡。");
-    window.open('./bearded-dragon-game/index.html', '_blank');
-});
+// --- 核心事件管理中心 (優先載入) ---
+function setupListeners() {
+    console.log("Setting up event listeners...");
+    
+    safeAddListener('minigame-btn', 'click', () => {
+        alert("準備好去「捕蟲大賽」大顯身手了嗎？\n你的得分將轉換為當天的食物補給！\n遊戲結束後請關閉分頁回到這裡。");
+        window.open('./bearded-dragon-game/index.html', '_blank');
+    });
 
-safeAddListener('racer-game-btn', 'click', () => {
-    alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
-    window.open('./bearded-dragon-racer/index.html', '_blank');
-    if (state.currentWish === 'go-racing') {
-        state.currentWish = null;
+    safeAddListener('racer-game-btn', 'click', () => {
+        alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
+        window.open('./bearded-dragon-racer/index.html', '_blank');
+        if (state.currentWish === 'go-racing') state.currentWish = null;
+    });
+
+    safeAddListener('terrarium-btn-main', 'click', () => {
+        alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
+        window.location.href = './bearded-dragon-terrarium/index.html';
+    });
+    
+    safeAddListener('terrarium-btn', 'click', () => {
+        window.location.href = './bearded-dragon-terrarium/index.html';
+    });
+
+    safeAddListener('start-game-btn', 'click', () => {
+        const nameInput = document.getElementById('pet-name-input');
+        const name = nameInput ? nameInput.value.trim() : "";
+        if (name) state.pet.name = name;
+        if (screens.selection) screens.selection.classList.add('hidden');
+        if (screens.game) screens.game.classList.remove('hidden');
+        if (elements.petDisplay) elements.petDisplay.className = `type-${state.pet.type}`;
+        updateUI();
+        window.scrollTo(0, 0);
+    });
+
+    safeAddListener('drink-btn', 'click', () => {
+        if (state.pet.thirst >= 100) return showBubble("我不渴喔！💧");
+        state.pet.thirst = Math.min(100, state.pet.thirst + 30);
+        showBubble("呼...好喝！💧");
+        createParticle('water');
+        updateUI();
+    });
+
+    safeAddListener('see-vet-btn', 'click', () => {
+        if (!state.pet.isSick) return showBubble("我現在很健康呀！不必看醫生～");
+        state.pet.isSick = false;
+        state.pet.happiness = Math.max(0, state.pet.happiness - 10);
+        showBubble("呼...好好了！🩺");
+        updateUI();
+    });
+
+    safeAddListener('clean-poop-btn', 'click', () => {
+        if (state.pet.poopCount <= 0) return showBubble("這裡很乾淨喔！✨");
+        state.pet.poopCount = 0;
+        state.pet.happiness = Math.min(100, state.pet.happiness + 5);
+        showBubble("清乾淨了！🧼");
+        updateUI();
+    });
+
+    safeAddListener('bath-btn', 'click', () => {
+        state.pet.cleanliness = 100;
+        showBubble("洗完澡香噴噴！🛁✨");
+        createParticles(elements.petDisplay.offsetLeft + 100, elements.petDisplay.offsetTop + 100, 'bubble');
+        updateUI();
+    });
+
+    safeAddListener('reset-btn', 'click', () => {
+        resetGame();
+    });
+
+    safeAddListener('game-clock', 'click', () => {
+        triggerTimeReport(new Date().getHours());
+    });
+    
+    // 行勁按鈕餵食連動
+    document.querySelectorAll('.action-btn[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleAction(btn.dataset.action);
+        });
+    });
+}
+
+function handleAction(actionType) {
+    if (actionType.startsWith('feed')) {
+        const item = actionType.split('-')[1];
+        if (state.inventory[item] <= 0) return showBubble("食材不夠了！");
+        state.inventory[item]--;
+        state.daily.feeds++;
     }
-});
-
-safeAddListener('terrarium-btn-main', 'click', () => {
-    alert("準備好為小龍佈置新家了嗎？🏠\n佈置完成後點擊儲存，主畫面背景就會更新喔！");
-    window.location.href = './bearded-dragon-terrarium/index.html';
-});
+    const effect = actions[actionType];
+    if (effect) {
+        applyEffect(effect, state.currentWish === actionType ? 2 : 1);
+        triggerDualAnimation();
+        createParticle(actionType);
+    }
+}
 
 // --- 去背處理 ---
 function processAssets() {
@@ -648,8 +726,12 @@ function resetGame() {
 
 // 立即執行或等待 DOM
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadGame);
+    document.addEventListener('DOMContentLoaded', () => {
+        setupListeners();
+        loadGame();
+    });
 } else {
+    setupListeners();
     loadGame();
 }
 
