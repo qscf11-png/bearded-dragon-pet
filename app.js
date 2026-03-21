@@ -91,9 +91,11 @@ function setupListeners() {
 
         if (state.currentWish === 'go-racing') {
             state.currentWish = null;
-            lastWishClearTime = Date.now();
+            const now = Date.now();
+            lastWishClearTime = now;
+            localStorage.setItem('lastWishClearTime', now); // 關鍵：同步跨分頁冷卻鎖
             saveGame();
-            updateUI(); // 雖然直接隱藏了 DOM，還是同步更新 state 與 UI 渲染
+            updateUI(); 
         }
     });
 
@@ -675,11 +677,12 @@ window.addEventListener('focus', () => {
         }
     }
 
-    // 3. 確保願望標籤同步清理 (防禦性修正：立即刷新 UI 防止殘留)
-    const racerMarker = localStorage.getItem('lastRacerScore');
-    if (state.currentWish === 'go-racing' && racerMarker) {
+    // 3. 確保願望標籤同步清理 (防禦性修正：使用剛取出的 lastRacerScore 判斷，因為 localStorage 中的已被上面移除)
+    if (state.currentWish === 'go-racing' && lastRacerScore) {
         state.currentWish = null;
-        lastWishClearTime = Date.now();
+        const now = Date.now();
+        lastWishClearTime = now;
+        localStorage.setItem('lastWishClearTime', now); // 補上同步寫入
         
         const badge = document.getElementById('wish-badge');
         if (badge) badge.classList.add('hidden');
