@@ -31,14 +31,24 @@ const SoundManager = {
     
     init() {
         if (this.bgm) return;
-        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+        // 更換為節奏感強的賽車專用音樂
+        this.bgm = new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8de304250.mp3');
         this.bgm.loop = true;
-        this.bgm.volume = 0.4;
+        this.bgm.volume = 0.5;
         if (this.isMuted) this.bgm.muted = true;
     },
     play() {
         this.init();
-        this.bgm.play().catch(e => console.log("BGM pending interaction"));
+        // 確保音軌位置重置並播放
+        this.bgm.currentTime = 0;
+        const playPromise = this.bgm.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("BGM Play failed, retrying on next interaction:", error);
+                // 註冊一次性全局點擊監聽作為保底
+                document.addEventListener('click', () => this.bgm.play(), { once: true });
+            });
+        }
     },
     stop() {
         if (this.bgm) {

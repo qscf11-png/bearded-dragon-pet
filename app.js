@@ -354,9 +354,10 @@ const SoundManager = {
 
     initBGM() {
         if (this.bgm) return;
-        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
+        // 更換為更輕快好聽的養成風格音樂
+        this.bgm = new Audio('https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d2.mp3');
         this.bgm.loop = true;
-        this.bgm.volume = 0.3;
+        this.bgm.volume = 0.2;
         if (this.isMuted) this.bgm.muted = true;
     },
 
