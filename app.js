@@ -814,7 +814,9 @@ function renderPoop() {
 // 監聽器已移至頂部安全綁定區域
 
 function renderTerrariumBackground() {
-    const container = document.querySelector('.interaction-zone');
+    // 優先掛載到專用的背景層，若無則掛到互動區 (降級)
+    let container = document.getElementById('terrarium-background');
+    if (!container) container = document.querySelector('.interaction-zone');
     if (!container) return;
 
     const saved = localStorage.getItem('beardedTerrariumNew');
@@ -822,8 +824,10 @@ function renderTerrariumBackground() {
 
     const config = JSON.parse(saved);
 
-    // 應用底材背景
-    container.className = `interaction-zone substrate-${config.substrate}`;
+    // 應用底材背景 (如果是互動區)
+    if (container.classList.contains('interaction-zone')) {
+        container.className = `interaction-zone substrate-${config.substrate}`;
+    }
     
     // 渲染裝飾物件
     let decorLayer = document.getElementById('decor-background-layer');
