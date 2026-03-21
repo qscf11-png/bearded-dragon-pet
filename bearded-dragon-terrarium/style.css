@@ -153,15 +153,13 @@ h1 { font-size: 1.2rem; }
 .item-rock { background-image: url('assets/rock.png'); }
 .item-log { background-image: url('assets/log.png'); }
 .item-plant { 
-    background-image: url('assets/items.png'); 
-    background-position: 50% center; 
-    background-size: 500% auto; 
+    background-image: url('assets/plant_clay.png'); 
+    background-size: contain; 
 }
 .item-bowl { background-image: url('assets/cactus.png'); }
 .item-hide { 
-    background-image: url('assets/items.png'); 
-    background-position: 0% center; 
-    background-size: 500% auto; 
+    background-image: url('assets/hideout_clay.png'); 
+    background-size: contain; 
 }
 
 /* 擺放後的物件 */

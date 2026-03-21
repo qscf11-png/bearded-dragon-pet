@@ -17,7 +17,7 @@ const backBtn = document.getElementById('back-btn');
 let processedAssets = {};
 
 function processAssets() {
-    const assets = ['rock.png', 'log.png', 'cactus.png', 'items.png'];
+    const assets = ['rock.png', 'log.png', 'cactus.png', 'plant_clay.png', 'hideout_clay.png'];
     assets.forEach(filename => {
         const img = new Image();
         img.src = `assets/${filename}`;
@@ -59,9 +59,9 @@ function applyAsset(el, type) {
     const imgMap = { 
         rock: 'rock.png', 
         log: 'log.png', 
-        plant: 'items.png', 
+        plant: 'plant_clay.png', 
         bowl: 'cactus.png',
-        hide: 'items.png'
+        hide: 'hideout_clay.png'
     };
     const filename = imgMap[type];
     if (processedAssets[filename]) {

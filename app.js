@@ -790,13 +790,13 @@ function renderTerrariumBackground() {
         const imgMap = { 
             rock: 'rock.png', 
             log: 'log.png', 
-            plant: 'items.png', 
+            plant: 'plant_clay.png', 
             bowl: 'cactus.png',
-            hide: 'items.png'
+            hide: 'hideout_clay.png'
         };
         el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${imgMap[item.type]}')`;
-        el.style.backgroundSize = (item.type === 'plant' || item.type === 'hide') ? '500% auto' : 'contain';
-        el.style.backgroundPosition = item.type === 'plant' ? '50% center' : (item.type === 'hide' ? '0% center' : 'center');
+        el.style.backgroundSize = 'contain';
+        el.style.backgroundPosition = 'center';
         el.style.backgroundRepeat = 'no-repeat';
         el.style.pointerEvents = 'none';
         
