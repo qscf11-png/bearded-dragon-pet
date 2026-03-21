@@ -269,60 +269,8 @@ function handleAction(actionType) {
     }
 }
 
-// --- 去背處理 ---
+// --- 去背處理 (已被移除，由 Python 腳本實體去背取代) ---
 let processedAssets = {};
-
-function processAssets() {
-    const assets = [
-        'assets/owner.png', 
-        'assets/pet_variants.png',
-        'bearded-dragon-terrarium/assets/rock.png',
-        'bearded-dragon-terrarium/assets/log.png',
-        'bearded-dragon-terrarium/assets/cactus.png',
-        'bearded-dragon-terrarium/assets/plant_clay.png',
-        'bearded-dragon-terrarium/assets/hideout_clay.png'
-    ];
-    assets.forEach(path => {
-        const img = new Image();
-        img.src = path;
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < data.data.length; i += 4) {
-                // 優化閾值：下調至 200 以兼容更多素材
-                if (data.data[i] > 200 && data.data[i+1] > 200 && data.data[i+2] > 200) {
-                    data.data[i+3] = 0;
-                }
-            }
-            ctx.putImageData(data, 0, 0);
-            const transparentUrl = canvas.toDataURL();
-            
-            // 存入全域緩存
-            const filename = path.split('/').pop();
-            processedAssets[filename] = transparentUrl;
-
-            // 更新相關元素的背景
-            if (path.includes('owner')) {
-                const targets = ['owner-avatar', 'game-owner-img'];
-                targets.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.src = transparentUrl;
-                });
-                document.querySelectorAll('.mini-avatar').forEach(el => el.src = transparentUrl);
-            } else if (path.includes('pet_variants')) {
-                elements.petDisplay.style.backgroundImage = `url(${transparentUrl})`;
-            }
-
-            // 觸發背景重新渲染
-            renderTerrariumBackground();
-        };
-    });
-}
-processAssets();
 
 
 // 初始化品種選擇
@@ -621,13 +569,7 @@ function updateUI() {
     if (roachEl) roachEl.textContent = state.inventory.roach;
     if (leafEl) leafEl.textContent = state.inventory.leaf;
 
-    // 更新頭像透明度處理（如果需要）
-    const avatar = document.getElementById('game-owner-img');
-    if (avatar && avatar.src.includes('data:image')) {
-        // 已經由 processAssets 處理過，不需額外動作
-    } else {
-        processAssets();
-    }
+    // 移除舊的 avatar 判斷
 
     // 生病效果
     if (state.pet.isSick) {
@@ -991,11 +933,7 @@ function renderTerrariumBackground() {
             hide: 'hideout_clay.png'
         };
         const filename = imgMap[item.type];
-        if (processedAssets[filename]) {
-            el.style.backgroundImage = `url(${processedAssets[filename]})`;
-        } else {
-            el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${filename}')`;
-        }
+        el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${filename}?v=5')`;
         
         el.style.backgroundSize = 'contain';
         el.style.backgroundPosition = 'center';
