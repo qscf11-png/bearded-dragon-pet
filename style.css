@@ -612,7 +612,12 @@ header {
     border-radius: 10px;
 }
 
-.your-pet-view { background-position: center; }
+.your-pet-view { 
+    background-position: center; 
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+}
 .rival-pet-view { background-position: left; filter: sepia(1); }
 
 .vs { font-size: 32px; font-weight: bold; color: #e74c3c; }
