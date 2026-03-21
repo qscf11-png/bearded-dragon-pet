@@ -801,10 +801,11 @@ function renderTerrariumBackground() {
         el.className = `placed-decor item-${item.type}`;
         el.style.left = `${item.x}%`;
         el.style.top = `${item.y}%`;
-        el.style.transform = `scale(${item.scale})`;
+        // 適度縮小主畫面裝飾比例 (0.8x)，避免過度擁擠
+        el.style.transform = `scale(${item.scale * 0.8})`;
         el.style.position = 'absolute';
-        el.style.width = '80px';
-        el.style.height = '80px';
+        el.style.width = '100px';
+        el.style.height = '100px';
         
         // 映射至新的高清素材
         const imgMap = { 
