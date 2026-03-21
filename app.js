@@ -712,21 +712,6 @@ window.resetGame = resetGame;
 
 
 
-function showBubble(text) {
-    elements.bubble.textContent = text;
-    elements.bubble.classList.remove('hidden');
-    setTimeout(() => {
-        elements.bubble.classList.add('hidden');
-    }, 2000);
-}
-
-function animatePet() {
-    elements.petDisplay.classList.add('animate-eat');
-    setTimeout(() => {
-        elements.petDisplay.classList.remove('animate-eat');
-    }, 500);
-}
-
 // --- 報時系統 ---
 function updateClock() {
     const clockEl = document.getElementById('current-time');
