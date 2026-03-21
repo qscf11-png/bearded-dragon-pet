@@ -22,6 +22,7 @@ let speed = 5;
 let items = [];
 let lastTimestamp = 0;
 let bgOffset = 0;
+let animationId = null; // 用於管理單一繪圖循環，防止重疊渲染
 
 // 資源載入
 const carImg = new Image();
@@ -44,9 +45,9 @@ bgImg.src = 'assets/background.png?v=2';
 let carsToDraw = carImg;
 let obstaclesToDraw = []; // 存儲處理後的畫布
 
-// 去背處理 (增加降級機制機制與跨域容錯)
-function makeTransparent(img, threshold = 250) {
-    if (!img || img.width === 0) return img;
+// 去背處理 (優化跨域容錯與白色過濾)
+function makeTransparent(img, threshold = 245) {
+    if (!img || img.complete === false || img.width === 0) return img;
     try {
         const c = document.createElement('canvas');
         c.width = img.width;
@@ -54,35 +55,28 @@ function makeTransparent(img, threshold = 250) {
         const cx = c.getContext('2d');
         cx.drawImage(img, 0, 0);
         const data = cx.getImageData(0, 0, c.width, c.height);
-        for (let i = 0; i < data.data.length; i += 4) {
-            if (data.data[i] > threshold && data.data[i+1] > threshold && data.data[i+2] > threshold) {
-                data.data[i+3] = 0;
+        const d = data.data;
+        for (let i = 0; i < d.length; i += 4) {
+            // 近似白色過濾 (RGB 均高於閾值)
+            if (d[i] > threshold && d[i+1] > threshold && d[i+2] > threshold) {
+                d[i+3] = 0;
             }
         }
         cx.putImageData(data, 0, 0);
         return c;
     } catch (e) {
-        console.warn("透明化處理失敗 (可能是跨域限制)，使用原始圖片。", e);
-        return img;
+        return img; // 失敗時返回原圖，由繪圖時的 multiply 混合模式保底
     }
 }
 
-Promise.all([
-    new Promise((r, j) => { carImg.onload = r; carImg.onerror = j; }),
-    ...obstacleImages.map(img => new Promise((r, j) => { img.onload = r; img.onerror = j; })),
-    new Promise((r, j) => { bgImg.onload = r; bgImg.onerror = j; })
 ]).then(() => {
-    console.log("所有資源載入成功！開始處理透明化...");
     carsToDraw = makeTransparent(carImg);
     obstaclesToDraw = obstacleImages.map(img => makeTransparent(img));
-    console.log("初始化完成，準備開跑！");
-    draw(); // 初始畫面
+    console.log("初始化完成");
+    if (!gameActive) draw(); // 僅在遊戲未啟動時畫出初始幀
 }).catch(err => {
-    console.error("資源載入失敗！將於 1 秒後嘗試直接啟動。", err);
-    setTimeout(() => {
-        obstaclesToDraw = obstacleImages; // 降級使用原始圖
-        draw();
-    }, 1000);
+    obstaclesToDraw = obstacleImages;
+    if (!gameActive) draw();
 });
 
 // 玩家對象
