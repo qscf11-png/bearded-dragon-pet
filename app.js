@@ -147,6 +147,40 @@ function setupListeners() {
     });
 }
 
+// --- 對話氣泡系統 (修復定義) ---
+function showBubble(text) {
+    const parent = elements.petDisplay || document.getElementById('pet-display');
+    if (!parent) return;
+    
+    // 清除舊氣泡
+    const old = parent.querySelector('.bubble');
+    if (old) old.remove();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    parent.appendChild(bubble);
+    
+    // 2.5秒後自動消失
+    setTimeout(() => { if (bubble.parentNode) bubble.remove(); }, 2500);
+}
+
+function showOwnerBubble(text) {
+    const parent = document.querySelector('.actor-box:first-child');
+    if (!parent) return;
+
+    // 清除舊氣泡
+    const old = parent.querySelector('.bubble');
+    if (old) old.remove();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble owner-bubble';
+    bubble.textContent = text;
+    parent.appendChild(bubble);
+    
+    setTimeout(() => { if (bubble.parentNode) bubble.remove(); }, 2500);
+}
+
 function handleAction(actionType) {
     if (actionType.startsWith('feed')) {
         const item = actionType.split('-')[1];
