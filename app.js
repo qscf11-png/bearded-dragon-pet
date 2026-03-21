@@ -76,7 +76,14 @@ function setupListeners() {
     safeAddListener('racer-game-btn', 'click', () => {
         alert("準備好帶小蜥蜴「出去兜風」了嗎？\n行駛距離越遠，心情會越好，也會長得更快喔！\n點擊左右兩側即可控制小車避開障礙物。");
         window.open('./bearded-dragon-racer/index.html', '_blank');
-        if (state.currentWish === 'go-racing') state.currentWish = null;
+        
+        // 滿足願望邏輯
+        if (state.currentWish === 'go-racing') {
+            state.currentWish = null;
+            lastWishClearTime = Date.now(); // 更新冷卻時間
+            saveGame();
+            updateUI();
+        }
     });
 
     safeAddListener('terrarium-btn-main', 'click', () => {
@@ -638,6 +645,13 @@ window.addEventListener('focus', () => {
             rewardModal.classList.remove('hidden');
             updateUI();
         }
+    }
+
+    // 3. 確保願望標籤同步清理 (防禦性)
+    if (state.currentWish === 'go-racing' && localStorage.getItem('lastRacerScore')) {
+        state.currentWish = null;
+        lastWishClearTime = Date.now();
+        updateUI();
     }
 });
 
