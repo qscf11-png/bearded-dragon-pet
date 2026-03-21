@@ -239,7 +239,8 @@ function processAssets() {
             ctx.drawImage(img, 0, 0);
             const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < data.data.length; i += 4) {
-                if (data.data[i] > 240 && data.data[i+1] > 240 && data.data[i+2] > 240) {
+                // 優化閾值：下調至 200 以兼容更多素材
+                if (data.data[i] > 200 && data.data[i+1] > 200 && data.data[i+2] > 200) {
                     data.data[i+3] = 0;
                 }
             }
