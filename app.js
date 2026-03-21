@@ -196,6 +196,7 @@ function handleAction(actionType) {
             multiplier = 2;
             showBubble("這就是我想做的！耶！✨");
             state.currentWish = null;
+            lastWishClearTime = Date.now(); // 紀錄願望滿足時間點
         } else {
             showBubble(effect.msg);
             showOwnerBubble(effect.ownerMsg || "來，給你吃！");
@@ -583,7 +584,16 @@ setInterval(() => {
     if (Date.now() - lastWishClearTime < 10000) return;
     
     if (Math.random() > 0.7) {
-        ... (產生願望)
+        const wishList = ['feed-cricket', 'feed-roach', 'sunbathe', 'go-racing'];
+        state.currentWish = wishList[Math.floor(Math.random() * wishList.length)];
+        const wishMsgs = {
+            'feed-cricket': "我想吃跳跳蟋蟀...🦗",
+            'feed-roach': "可以給我杜比亞蟑螂嗎？🤤",
+            'sunbathe': "我想曬太陽獲取 D3...☀️",
+            'go-racing': "帶我出去兜風好嗎？🚗"
+        };
+        showBubble(wishMsgs[state.currentWish]);
+        updateUI();
     }
 }, 15000);
 
