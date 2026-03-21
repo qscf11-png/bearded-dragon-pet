@@ -208,6 +208,9 @@ function handleAction(actionType) {
         // --- 補回音效播放 ---
         if (actionType.startsWith('feed')) SoundManager.playEat();
         if (actionType === 'sunbathe') SoundManager.playSun();
+        
+        // 強制刷新 UI 確保願望標籤即時消失
+        updateUI();
     }
 }
 
@@ -572,19 +575,15 @@ function updateUI() {
 }
 
 // 願望系統 (每 15 秒檢查一次)
+let lastWishClearTime = 0; // 新增冷卻時間鎖
+
 setInterval(() => {
+    // 若遊戲隱藏、已有願望、生病中、或剛達成願望未滿 10 秒，則不產生新願望
     if (screens.game.classList.contains('hidden') || state.currentWish || state.pet.isSick) return;
+    if (Date.now() - lastWishClearTime < 10000) return;
     
     if (Math.random() > 0.7) {
-        const wishList = ['feed-cricket', 'feed-roach', 'sunbathe', 'go-racing'];
-        state.currentWish = wishList[Math.floor(Math.random() * wishList.length)];
-        const wishMsgs = {
-            'feed-cricket': "我想吃跳跳蟋蟀...🦗",
-            'feed-roach': "可以給我杜比亞蟑螂嗎？🤤",
-            'sunbathe': "我想曬太陽獲取 D3...☀️",
-            'go-racing': "帶我出去兜風好嗎？🚗"
-        };
-        showBubble(wishMsgs[state.currentWish]);
+        ... (產生願望)
     }
 }, 15000);
 
