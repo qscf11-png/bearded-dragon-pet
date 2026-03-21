@@ -35,7 +35,7 @@ body {
 }
 
 .screen {
-    position: relative; /* 改為相對定位，方便隨內容增長 */
+    position: relative; /* 確保內容能自然撐開高度 */
     width: 100%;
     min-height: 100vh;
     display: flex;
@@ -43,10 +43,8 @@ body {
     padding: 20px;
 }
 
-.hidden {
+.screen.hidden {
     display: none !important;
-    opacity: 0;
-    pointer-events: none;
 }
 
 /* 挑選畫面 */
