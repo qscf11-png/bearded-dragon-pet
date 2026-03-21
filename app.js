@@ -625,7 +625,28 @@ setInterval(() => {
 
     // 願望觸發機率
     if (Math.random() > 0.6) {
-        const wishList = ['feed-cricket', 'feed-roach', 'sunbathe', 'go-racing'];
+        let wishList = [];
+        
+        // 智能需求判斷：只有數值低於 70% 時才會有對應的需求
+        if (state.pet.hunger < 70) {
+            wishList.push('feed-cricket', 'feed-roach');
+        }
+        if (state.pet.happiness < 70) {
+            wishList.push('go-racing');
+        }
+        
+        // 曬太陽屬於休閒行為，任何時候都可以發生，但數值高時機率高，數值低時優先補飢餓或心情
+        if (state.pet.hunger >= 70 && state.pet.happiness >= 70) {
+            // 如果吃飽喝足，偶爾想曬曬太陽 (但也可能不吵鬧)
+            if (Math.random() > 0.5) wishList.push('sunbathe');
+        } else {
+            // 還有其他需求時，仍有一點機率只想曬太陽
+            if (Math.random() > 0.7) wishList.push('sunbathe');
+        }
+
+        // 當所有數值都很完美，且這次剛好不想曬太陽時，就不產生願望
+        if (wishList.length === 0) return;
+
         state.currentWish = wishList[Math.floor(Math.random() * wishList.length)];
         
         const wishMsgs = {
