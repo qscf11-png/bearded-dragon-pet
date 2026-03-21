@@ -587,6 +587,11 @@ function updateUI() {
     // 更新心願標籤
     const wishBadge = document.getElementById('wish-badge');
     if (wishBadge) {
+        // --- 智能撤回邏輯：如果數值已被透過其他方式填滿，則強制放棄願望 ---
+        if (state.currentWish === 'go-racing' && state.pet.happiness >= 75) state.currentWish = null;
+        if ((state.currentWish === 'feed-cricket' || state.currentWish === 'feed-roach') && state.pet.hunger >= 75) state.currentWish = null;
+        if (state.currentWish === 'sunbathe' && state.pet.happiness >= 95 && state.pet.hunger >= 95) state.currentWish = null; // 太滿時連曬太陽都不想
+
         if (state.currentWish) {
             const wishMap = {
                 'feed-cricket': "想要蟋蟀 🦗",
