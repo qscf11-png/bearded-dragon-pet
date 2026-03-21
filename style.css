@@ -280,6 +280,10 @@ header {
     background-size: 300% auto;
     background-position: center center;
     transition: transform 0.3s ease, background-position 0.5s ease;
+    /* 視覺優化：消除白色毛邊 */
+    image-rendering: pixelated; /* 銳利化邊緣 */
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.4)); /* 增加微細深色邊緣掩蓋亮點 */
 }
 
 #poop-container {
