@@ -587,10 +587,17 @@ function updateUI() {
     // 更新心願標籤
     const wishBadge = document.getElementById('wish-badge');
     if (wishBadge) {
-        // --- 智能撤回邏輯：如果數值已被透過其他方式填滿，則強制放棄願望 ---
-        if (state.currentWish === 'go-racing' && state.pet.happiness >= 75) state.currentWish = null;
-        if ((state.currentWish === 'feed-cricket' || state.currentWish === 'feed-roach') && state.pet.hunger >= 75) state.currentWish = null;
-        if (state.currentWish === 'sunbathe' && state.pet.happiness >= 95 && state.pet.hunger >= 95) state.currentWish = null; // 太滿時連曬太陽都不想
+        // --- 智能撤回邏輯：全面下調至 50%，只要及格就絕對不吵鬧 ---
+        if (state.currentWish === 'go-racing' && state.pet.happiness >= 50) {
+            state.currentWish = null;
+            localStorage.setItem('lastWishClearTime', Date.now().toString());
+        }
+        if ((state.currentWish === 'feed-cricket' || state.currentWish === 'feed-roach') && state.pet.hunger >= 50) {
+            state.currentWish = null;
+            localStorage.setItem('lastWishClearTime', Date.now().toString());
+        }
+        if (state.currentWish === 'sunbathe' && state.pet.happiness >= 80 && state.pet.hunger >= 80) state.currentWish = null; // 太滿時連曬太陽都不想
+
 
         if (state.currentWish) {
             const wishMap = {
@@ -632,21 +639,20 @@ setInterval(() => {
     if (Math.random() > 0.6) {
         let wishList = [];
         
-        // 智能需求判斷：只有數值低於 70% 時才會有對應的需求
-        if (state.pet.hunger < 70) {
+        // 智能需求判斷：只有數值低破一半 (<50%) 時才會有急迫需求！絕不隨便吵鬧
+        if (state.pet.hunger < 50) {
             wishList.push('feed-cricket', 'feed-roach');
         }
-        if (state.pet.happiness < 70) {
+        if (state.pet.happiness < 50) {
             wishList.push('go-racing');
         }
         
-        // 曬太陽屬於休閒行為，任何時候都可以發生，但數值高時機率高，數值低時優先補飢餓或心情
-        if (state.pet.hunger >= 70 && state.pet.happiness >= 70) {
-            // 如果吃飽喝足，偶爾想曬曬太陽 (但也可能不吵鬧)
-            if (Math.random() > 0.5) wishList.push('sunbathe');
+        // 只有在全部安全、沒有緊急需求時，才會「偶爾」想曬太陽
+        if (state.pet.hunger >= 50 && state.pet.happiness >= 50) {
+            if (Math.random() > 0.6) wishList.push('sunbathe');
         } else {
-            // 還有其他需求時，仍有一點機率只想曬太陽
-            if (Math.random() > 0.7) wishList.push('sunbathe');
+            // 如果還餓著或不爽，就不太會提出悠閒曬太陽的願望
+            if (Math.random() > 0.85) wishList.push('sunbathe');
         }
 
         // 當所有數值都很完美，且這次剛好不想曬太陽時，就不產生願望
