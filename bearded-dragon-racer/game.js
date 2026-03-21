@@ -31,10 +31,11 @@ const SoundManager = {
     
     init() {
         if (this.bgm) return;
-        // 更換為節奏感強的賽車專用音樂
-        this.bgm = new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8de304250.mp3');
+        // 更換為更穩定的賽車音樂來源
+        this.bgm = new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_0b26f5628b.mp3');
         this.bgm.loop = true;
         this.bgm.volume = 0.5;
+        this.bgm.preload = 'auto'; // 加強預加載
         if (this.isMuted) this.bgm.muted = true;
     },
     play() {
@@ -46,7 +47,12 @@ const SoundManager = {
             playPromise.catch(error => {
                 console.log("BGM Play failed, retrying on next interaction:", error);
                 // 註冊一次性全局點擊監聽作為保底
-                document.addEventListener('click', () => this.bgm.play(), { once: true });
+                const unlock = () => {
+                    this.bgm.play().then(() => {
+                        document.removeEventListener('click', unlock);
+                    });
+                };
+                document.addEventListener('click', unlock);
             });
         }
     },

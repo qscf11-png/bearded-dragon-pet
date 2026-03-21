@@ -737,6 +737,9 @@ window.addEventListener('focus', () => {
         saveGame();
         updateUI();
     }
+
+    // 4. 重啟背景音樂 (解決從小遊戲回來後音樂消失的問題)
+    SoundManager.playMainBGM();
 });
 
 closeRewardBtn.addEventListener('click', () => {
