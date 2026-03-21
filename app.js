@@ -354,8 +354,8 @@ const SoundManager = {
 
     initBGM() {
         if (this.bgm) return;
-        // 更換為極具治癒感的溫馨 Lofi Piano 風格
-        this.bgm = new Audio('https://cdn.pixabay.com/audio/2022/01/18/audio_6108ad4197.mp3');
+        // 更換為極具治癒感的溫馨 Lofi Piano 風格 (改用穩定無防盜鏈的訊源)
+        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
         this.bgm.loop = true;
         this.bgm.volume = 0.15; // 稍微調降音量，確保背景氛圍感
         if (this.isMuted) this.bgm.muted = true;

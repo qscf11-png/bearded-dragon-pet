@@ -31,8 +31,8 @@ const SoundManager = {
     
     init() {
         if (this.bgm) return;
-        // 更換為更穩定的賽車音樂來源
-        this.bgm = new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_0b26f5628b.mp3');
+        // 更換為更穩定的賽車音樂來源 (無 CORS 與防盜鏈限制)
+        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
         this.bgm.loop = true;
         this.bgm.volume = 0.5;
         this.bgm.preload = 'auto'; // 加強預加載
