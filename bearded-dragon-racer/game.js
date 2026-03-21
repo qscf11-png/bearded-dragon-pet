@@ -260,11 +260,17 @@ function startGame() {
     movePlayer(0);
     overlay.classList.add('hidden');
     lastTimestamp = performance.now();
+    
+    SoundManager.play(); // 啟動比賽音樂
+    
     draw();
 }
 
 function gameOver() {
     gameActive = false;
+    
+    SoundManager.stop(); // 停止比賽音樂
+    
     overlay.classList.remove('hidden');
     overlayTitle.textContent = "旅行結束！";
     overlayDesc.innerHTML = `你載著小蜥蜴跑了 <b>${score}</b> 米！<br>心情大好！成長了不少喔！`;
