@@ -78,6 +78,9 @@ function safeAddListener(id, event, callback) {
         });
     } else {
         el.addEventListener(event, callback);
+    }
+}
+
 // --- 核心事件管理中心 (優先載入) ---
 function setupListeners() {
     console.log("Setting up event listeners...");
