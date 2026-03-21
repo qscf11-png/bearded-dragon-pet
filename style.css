@@ -203,6 +203,13 @@ header {
     pointer-events: none;
 }
 
+.placed-decor {
+    mix-blend-mode: multiply; /* 保底去背方案：讓白色背景變透明 */
+    pointer-events: none;     /* 防止阻擋點擊寵物 */
+    z-index: 1;               /* 確保在底層 */
+    filter: brightness(1.1) contrast(1.1); /* 補償亮度 */
+}
+
 .actor-box {
     display: flex;
     flex-direction: column;
@@ -306,10 +313,12 @@ header {
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7); /* 加深背景，減少裝飾品干擾 */
     padding: 10px 20px;
     border-radius: 30px;
     width: 90%;
+    z-index: 9999 !important; /* 強制置頂 */
+    pointer-events: none;    /* 不攔截點擊，方便連點餵食 */
 }
 
 .stat-row {
