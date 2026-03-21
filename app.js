@@ -83,6 +83,7 @@ function setupListeners() {
     });
 
     safeAddListener('racer-game-btn', 'click', () => {
+        SoundManager.stopBGM(); // 進入小遊戲前暫停主音樂
         window.open('./bearded-dragon-racer/index.html', '_blank');
         
         // --- 瞬時強制隱藏標籤 (消除 10s 延遲感) ---
@@ -107,6 +108,11 @@ function setupListeners() {
     safeAddListener('terrarium-btn', 'click', () => {
         window.location.href = './bearded-dragon-terrarium/index.html';
     });
+    
+    // 背景音樂控制
+    safeAddListener('toggle-bgm', 'click', () => {
+        SoundManager.toggleMute();
+    });
 
     safeAddListener('start-game-btn', 'click', () => {
         const nameInput = document.getElementById('pet-name-input');
@@ -116,6 +122,7 @@ function setupListeners() {
         if (screens.game) screens.game.classList.remove('hidden');
         if (elements.petDisplay) elements.petDisplay.className = `type-${state.pet.type}`;
         updateUI();
+        SoundManager.playMainBGM(); // 首次互動啟動音樂
         window.scrollTo(0, 0);
     });
 
@@ -339,10 +346,47 @@ safeAddListener('drink-btn', 'click', () => {
 });
 
 
-// --- 音效引擎 (Web Audio API) ---
+// --- 音效引擎 (Web Audio API + HTML5 Audio) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const SoundManager = {
+    bgm: null,
+    isMuted: localStorage.getItem('beardedMuted') === 'true',
+
+    initBGM() {
+        if (this.bgm) return;
+        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
+        this.bgm.loop = true;
+        this.bgm.volume = 0.3;
+        if (this.isMuted) this.bgm.muted = true;
+    },
+
+    playMainBGM() {
+        this.initBGM();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        this.bgm.play().catch(e => console.log("Autoplay blocked, waiting for interaction"));
+    },
+
+    stopBGM() {
+        if (this.bgm) {
+            this.bgm.pause();
+            this.bgm.currentTime = 0;
+        }
+    },
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('beardedMuted', this.isMuted);
+        if (this.bgm) this.bgm.muted = this.isMuted;
+        
+        const btn = document.getElementById('toggle-bgm');
+        if (btn) {
+            btn.textContent = this.isMuted ? '🔇' : '🔊';
+            btn.classList.toggle('muted', this.isMuted);
+        }
+    },
+
     playEat() {
+        if (this.isMuted) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -357,6 +401,7 @@ const SoundManager = {
         osc.stop(audioCtx.currentTime + 0.1);
     },
     playSun() {
+        if (this.isMuted) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -371,6 +416,7 @@ const SoundManager = {
         osc.stop(audioCtx.currentTime + 0.3);
     },
     playChirp() {
+        if (this.isMuted) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -759,7 +805,18 @@ if (document.readyState === 'loading') {
     });
 } else {
     setupListeners();
-    loadGame();
+    const hasData = loadGame();
+    if (hasData) {
+        // 若是已有存檔加載，同步靜音狀態圖示
+        const btn = document.getElementById('toggle-bgm');
+        if (btn && SoundManager.isMuted) {
+            btn.textContent = '🔇';
+            btn.classList.add('muted');
+        }
+        // 雖然 loadGame 了，但仍需等待第一次用戶點擊才能播音樂，
+        // 這裡可以透過監聽全域點擊來啟動 BGM。
+        document.addEventListener('click', () => SoundManager.playMainBGM(), { once: true });
+    }
 }
 
 window.resetGame = resetGame;

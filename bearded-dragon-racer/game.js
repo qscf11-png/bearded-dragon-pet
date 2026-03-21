@@ -24,6 +24,30 @@ let lastTimestamp = 0;
 let bgOffset = 0;
 let animationId = null; // 用於管理單一繪圖循環，防止重疊渲染
 
+// 音效管理 (繼承主遊戲靜音狀態)
+const SoundManager = {
+    bgm: null,
+    isMuted: localStorage.getItem('beardedMuted') === 'true',
+    
+    init() {
+        if (this.bgm) return;
+        this.bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+        this.bgm.loop = true;
+        this.bgm.volume = 0.4;
+        if (this.isMuted) this.bgm.muted = true;
+    },
+    play() {
+        this.init();
+        this.bgm.play().catch(e => console.log("BGM pending interaction"));
+    },
+    stop() {
+        if (this.bgm) {
+            this.bgm.pause();
+            this.bgm.currentTime = 0;
+        }
+    }
+};
+
 // 資源載入
 const carImg = new Image();
 carImg.src = 'assets/cars.png?v=2';

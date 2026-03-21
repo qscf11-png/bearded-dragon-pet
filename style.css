@@ -135,10 +135,39 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
-    background: var(--glass);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sound-controls {
+    display: flex;
+    align-items: center;
+}
+
+.sound-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.sound-toggle:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+}
+
+.sound-toggle.muted {
+    opacity: 0.5;
 }
 
 .time-container {
