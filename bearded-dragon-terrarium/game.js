@@ -13,36 +13,7 @@ const canvas = document.getElementById('terrarium-canvas');
 const saveBtn = document.getElementById('save-btn');
 const backBtn = document.getElementById('back-btn');
 
-// --- 素材透明化處理 ---
-let processedAssets = {};
-
-function processAssets() {
-    const assets = ['rock.png', 'log.png', 'cactus.png', 'plant_clay.png', 'hideout_clay.png'];
-    assets.forEach(filename => {
-        const img = new Image();
-        img.src = `assets/${filename}`;
-        img.onload = () => {
-            const tempCanvas = document.createElement('canvas');
-            const ctx = tempCanvas.getContext('2d');
-            tempCanvas.width = img.width;
-            tempCanvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            const data = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            // 移除接近白色的背景
-            for (let i = 0; i < data.data.length; i += 4) {
-                if (data.data[i] > 240 && data.data[i+1] > 240 && data.data[i+2] > 240) {
-                    data.data[i+3] = 0;
-                }
-            }
-            ctx.putImageData(data, 0, 0);
-            processedAssets[filename] = tempCanvas.toDataURL();
-            console.log(`Processed: ${filename}`);
-            
-            // 重新渲染已存在畫布上的物件
-            refreshRenderedItems();
-        };
-    });
-}
+// --- 素材處理 (已由 Python 直接完美處理實體檔案，不再需要前端 Canvas 強制去背) ---
 
 function refreshRenderedItems() {
     const items = document.querySelectorAll('.placed-item');
@@ -64,16 +35,11 @@ function applyAsset(el, type) {
         hide: 'hideout_clay.png'
     };
     const filename = imgMap[type];
-    if (processedAssets[filename]) {
-        el.style.backgroundImage = `url(${processedAssets[filename]})`;
-    } else {
-        el.style.backgroundImage = `url(assets/${filename})`;
-    }
+    el.style.backgroundImage = `url(assets/${filename}?v=6)`;
 }
 
 // 初始化並載入
 window.onload = () => {
-    processAssets();
     try {
         const saved = localStorage.getItem('beardedTerrariumNew');
         if (saved) {
