@@ -185,7 +185,7 @@ header {
     background: rgba(0,0,0,0.2);
     border-radius: 20px;
     margin: 10px 0;
-    overflow: hidden; /* 確保底材不溢出 */
+    overflow: visible; /* 允許對話氣泡向上溢出顯示 */
 }
 
 /* 裝飾背景底材 */
