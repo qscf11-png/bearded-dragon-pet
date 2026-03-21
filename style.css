@@ -276,7 +276,7 @@ header {
     position: relative;
     width: 180px;
     height: 180px;
-    background-image: url('assets/pet_variants.png');
+    background-image: url('assets/pet_variants.png?v=4');
     background-size: 300% auto;
     background-position: center center;
     transition: transform 0.3s ease, background-position 0.5s ease;

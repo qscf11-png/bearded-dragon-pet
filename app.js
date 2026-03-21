@@ -78,47 +78,6 @@ function safeAddListener(id, event, callback) {
         });
     } else {
         el.addEventListener(event, callback);
-    }
-}
-
-// --- 像素處理工具：消除白色毛邊 (Defringing) ---
-let processedPetSprite = null;
-function processPetSprite(url, callback) {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imgData.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-            // 核心邏輯：如果像素是半透明且顏色過亮 (接近白色)，則直接去背
-            // 這能有效移除抗鋸齒產生的白色毛邊
-            if (a > 0 && a < 255) {
-                const brightness = (r + g + b) / 3;
-                if (brightness > 180) {
-                    data[i+3] = 0; // 設為全透明
-                }
-            }
-            // 對於全實色但極亮的邊緣像素也進行微調 (可選)
-            if (a === 255 && r > 245 && g > 245 && b > 245) {
-                data[i+3] = 0;
-            }
-        }
-        
-        ctx.putImageData(imgData, 0, 0);
-        processedPetSprite = canvas.toDataURL();
-        if (callback) callback(processedPetSprite);
-    };
-    img.src = url;
-}
-
 // --- 核心事件管理中心 (優先載入) ---
 function setupListeners() {
     console.log("Setting up event listeners...");
@@ -634,20 +593,6 @@ closeModalBtn.addEventListener('click', () => {
 
 function updateUI() {
     if (!state.pet || !elements.displayPetName) return;
-
-    // 處理寵物素材 (去毛邊)
-    if (!processedPetSprite && elements.petDisplay) {
-        processPetSprite('assets/pet_variants.png', (url) => {
-            elements.petDisplay.style.backgroundImage = `url(${url})`;
-            // 同時更新彈窗中的寵物
-            const yourView = document.querySelector('.your-pet-view');
-            if (yourView) yourView.style.backgroundImage = `url(${url})`;
-        });
-    } else if (processedPetSprite) {
-        elements.petDisplay.style.backgroundImage = `url(${processedPetSprite})`;
-        const yourView = document.querySelector('.your-pet-view');
-        if (yourView) yourView.style.backgroundImage = `url(${processedPetSprite})`;
-    }
 
     try {
         elements.displayPetName.textContent = state.pet.name;
