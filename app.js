@@ -166,8 +166,18 @@ function handleAction(actionType) {
 }
 
 // --- 去背處理 ---
+let processedAssets = {};
+
 function processAssets() {
-    const assets = ['assets/owner.png', 'assets/pet_variants.png'];
+    const assets = [
+        'assets/owner.png', 
+        'assets/pet_variants.png',
+        'bearded-dragon-terrarium/assets/rock.png',
+        'bearded-dragon-terrarium/assets/log.png',
+        'bearded-dragon-terrarium/assets/cactus.png',
+        'bearded-dragon-terrarium/assets/plant_clay.png',
+        'bearded-dragon-terrarium/assets/hideout_clay.png'
+    ];
     assets.forEach(path => {
         const img = new Image();
         img.src = path;
@@ -186,6 +196,10 @@ function processAssets() {
             ctx.putImageData(data, 0, 0);
             const transparentUrl = canvas.toDataURL();
             
+            // 存入全域緩存
+            const filename = path.split('/').pop();
+            processedAssets[filename] = transparentUrl;
+
             // 更新相關元素的背景
             if (path.includes('owner')) {
                 const targets = ['owner-avatar', 'game-owner-img'];
@@ -194,10 +208,12 @@ function processAssets() {
                     if (el) el.src = transparentUrl;
                 });
                 document.querySelectorAll('.mini-avatar').forEach(el => el.src = transparentUrl);
-            } else {
+            } else if (path.includes('pet_variants')) {
                 elements.petDisplay.style.backgroundImage = `url(${transparentUrl})`;
             }
 
+            // 觸發背景重新渲染
+            renderTerrariumBackground();
         };
     });
 }
@@ -798,7 +814,13 @@ function renderTerrariumBackground() {
             bowl: 'cactus.png',
             hide: 'hideout_clay.png'
         };
-        el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${imgMap[item.type]}')`;
+        const filename = imgMap[item.type];
+        if (processedAssets[filename]) {
+            el.style.backgroundImage = `url(${processedAssets[filename]})`;
+        } else {
+            el.style.backgroundImage = `url('bearded-dragon-terrarium/assets/${filename}')`;
+        }
+        
         el.style.backgroundSize = 'contain';
         el.style.backgroundPosition = 'center';
         el.style.backgroundRepeat = 'no-repeat';
