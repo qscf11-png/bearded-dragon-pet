@@ -205,7 +205,13 @@ function handleAction(actionType) {
             multiplier = 2;
             showBubble("這就是我想做的！耶！✨");
             state.currentWish = null;
-            lastWishClearTime = Date.now(); // 紀錄願望滿足時間點
+            lastWishClearTime = Date.now(); 
+            
+            // --- 物理隱藏保底 (關鍵修復：不等 updateUI) ---
+            const badge = document.getElementById('wish-badge');
+            if (badge) badge.classList.add('hidden');
+            
+            saveGame(); // 即刻同步數據
         } else {
             showBubble(effect.msg);
             showOwnerBubble(effect.ownerMsg || "來，給你吃！");
