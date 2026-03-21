@@ -158,6 +158,10 @@ function handleAction(actionType) {
         applyEffect(effect, state.currentWish === actionType ? 2 : 1);
         triggerDualAnimation();
         createParticle(actionType);
+        
+        // --- 補回音效播放 ---
+        if (actionType.startsWith('feed')) SoundManager.playEat();
+        if (actionType === 'sunbathe') SoundManager.playSun();
     }
 }
 
