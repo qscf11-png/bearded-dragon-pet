@@ -199,18 +199,24 @@ function draw() {
         }
     });
 
-    // 畫玩家賽車
+    // 畫玩家賽車 (關鍵修復：改為縱向 3x1 切割)
     const typeIndices = { 'red': 0, 'orange': 1, 'yellow': 2 };
     const index = typeIndices[player.type] !== undefined ? typeIndices[player.type] : 1;
     
-    // 精確切割 Sprite (橫向 1x3 佈局)
-    const sw = carsToDraw.width / 3;
-    const sh = carsToDraw.height; 
+    // 正確切割：素材為縱向排列
+    const sw = carsToDraw.width;
+    const sh = carsToDraw.height / 3; 
+    const sy = index * sh;
+    
+    // 保持原始素材比例繪製，防止變扁
+    const aspectRatio = sw / sh;
+    const drawWidth = player.width;
+    const drawHeight = drawWidth / aspectRatio;
     
     ctx.drawImage(
         carsToDraw,
-        index * sw, 0, sw, sh,
-        player.x, player.y, player.width, player.height
+        0, sy, sw, sh,
+        player.x, player.y + (player.height - drawHeight), drawWidth, drawHeight
     );
 
     ctx.restore();
