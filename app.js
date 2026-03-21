@@ -71,6 +71,15 @@ function setupListeners() {
     safeAddListener('minigame-btn', 'click', () => {
         alert("準備好去「捕蟲大賽」大顯身手了嗎？\n你的得分將轉換為當天的食物補給！\n遊戲結束後請關閉分頁回到這裡。");
         window.open('./bearded-dragon-game/index.html', '_blank');
+        
+        // 捕蟲遊戲自動滿足「進食願望」 (防禦性清理)
+        if (state.currentWish === 'feed-cricket' || state.currentWish === 'feed-roach') {
+            state.currentWish = null;
+            const now = Date.now();
+            localStorage.setItem('lastWishClearTime', now);
+            saveGame();
+            updateUI();
+        }
     });
 
     safeAddListener('racer-game-btn', 'click', () => {
@@ -596,23 +605,30 @@ function updateUI() {
 }
 
 // 願望系統 (每 15 秒檢查一次)
-let lastWishClearTime = 0; // 新增冷卻時間鎖
+let lastWishClearTime = parseInt(localStorage.getItem('lastWishClearTime') || 0);
 
 setInterval(() => {
-    // 若遊戲隱藏、已有願望、生病中、或剛達成願望未滿 10 秒，則不產生新願望
-    if (screens.game.classList.contains('hidden') || state.currentWish || state.pet.isSick) return;
-    if (Date.now() - lastWishClearTime < 10000) return;
+    // 檢查遊戲是否隱藏
+    if (document.hidden || screens.game.classList.contains('hidden') || state.currentWish || state.pet.isSick) return;
     
-    if (Math.random() > 0.7) {
+    // 獲取最新冷卻時間 (多視窗同步)
+    const currentClearTime = parseInt(localStorage.getItem('lastWishClearTime') || 0);
+    if (Date.now() - currentClearTime < 15000) return; // 冷卻 15 秒
+
+    // 願望觸發機率
+    if (Math.random() > 0.6) {
         const wishList = ['feed-cricket', 'feed-roach', 'sunbathe', 'go-racing'];
         state.currentWish = wishList[Math.floor(Math.random() * wishList.length)];
+        
         const wishMsgs = {
             'feed-cricket': "我想吃跳跳蟋蟀...🦗",
             'feed-roach': "可以給我杜比亞蟑螂嗎？🤤",
             'sunbathe': "我想曬太陽獲取 D3...☀️",
             'go-racing': "帶我出去兜風好嗎？🚗"
         };
+        
         showBubble(wishMsgs[state.currentWish]);
+        saveGame(); // 同步至磁碟，防止刷新丟失
         updateUI();
     }
 }, 15000);
